@@ -38,7 +38,8 @@ export default function PricingPage() {
     );
     setActivePlan(currentPlan);
     setPaidUsers((value) => Math.min(100, value + 1));
-    router.push("/exam");
+    window.localStorage.removeItem("pmp-simulator-progress-v1");
+    router.push("/exam?plan=live&fresh=1");
   };
 
   return (
@@ -73,7 +74,7 @@ export default function PricingPage() {
               Fixed 1000-question PMP practice bank with random practice sets
               and 150 learning questions per topic.
             </p>
-            <Link href="/exam" className="intro-secondary-action">
+            <Link href="/exam?plan=free&fresh=1" className="intro-secondary-action">
               Start free practice
             </Link>
           </section>

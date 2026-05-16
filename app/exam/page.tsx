@@ -43,7 +43,9 @@ type DomainFilter =
   | "Business Environment";
 type DifficultyFilter = "Mixed" | "Easy" | "Medium" | "Hard";
 type FreeTopicSlug = string;
+type PracticeAccess = "free" | "live";
 type SavedProgress = {
+  accessType?: PracticeAccess;
   mode?: ExamMode;
   domain?: DomainFilter;
   difficulty?: DifficultyFilter;
@@ -59,7 +61,7 @@ type SavedProgress = {
 const totalQuestions = 185;
 const freeTopicQuestionCount = 150;
 const palettePageSize = 60;
-const firstApiTriggerAnswerCount = 10;
+const liveInitialBufferCount = 10;
 const desiredBufferAhead = 25;
 const storageKey = "pmp-simulator-progress-v1";
 const resultsStorageKey = "pmp-simulator-latest-results-v1";
@@ -559,6 +561,7 @@ export default function ExamPage() {
   const [freeTopicSlug, setFreeTopicSlug] = useState<FreeTopicSlug | null>(null);
   const [isFreeTopicPractice, setIsFreeTopicPractice] = useState(false);
   const [hasPaidPlan, setHasPaidPlan] = useState(false);
+  const [accessType, setAccessType] = useState<PracticeAccess>("free");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [paletteSegment, setPaletteSegment] = useState(0);
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
@@ -584,7 +587,9 @@ export default function ExamPage() {
   const learningTopic = currentQuestion
     ? getLearningTopicForQuestion(currentQuestion)
     : null;
-  const bufferedAhead = Math.max(0, questions.length - questionNumber);
+  const bufferedAhead = currentQuestion
+    ? Math.max(0, questions.length - questionNumber)
+    : questions.length;
 
   const score = useMemo(
     () =>
@@ -672,11 +677,17 @@ export default function ExamPage() {
       const params = new URLSearchParams(window.location.search);
       const requestedTopic = params.get("topic") as FreeTopicSlug | null;
       const requestedFreeMode = params.get("free") === "1";
+      const requestedPlan = params.get("plan");
+      const forceFreshSession = params.get("fresh") === "1";
       const isSupportedTopic =
         requestedTopic !== null && requestedTopic in learningTopics;
 
       const userHasPaidPlan = loadPaidPlan();
+      const nextAccessType: PracticeAccess =
+        requestedPlan === "free" || !userHasPaidPlan ? "free" : "live";
+
       setHasPaidPlan(userHasPaidPlan);
+      setAccessType(nextAccessType);
 
       if (requestedFreeMode && requestedTopic && isSupportedTopic) {
         const freeQuestions = buildFreeTopicQuestions(requestedTopic).map(
@@ -690,6 +701,7 @@ export default function ExamPage() {
         setDifficulty("Mixed");
         setFreeTopicSlug(requestedTopic);
         setIsFreeTopicPractice(true);
+        setAccessType("free");
         setCurrentQuestionIndex(0);
         setPaletteSegment(0);
         setShowAnswer(false);
@@ -699,8 +711,10 @@ export default function ExamPage() {
       }
 
       const savedProgress = loadSavedProgress();
+      const canUseSavedProgress =
+        savedProgress?.accessType === nextAccessType && !forceFreshSession;
 
-      if (savedProgress) {
+      if (canUseSavedProgress && savedProgress) {
         const savedQuestionIndex = Math.max(
           0,
           (savedProgress.questionNumber ?? 1) - 1,
@@ -716,7 +730,7 @@ export default function ExamPage() {
         setPaletteSegment(Math.floor(savedQuestionIndex / palettePageSize));
         setShowAnswer(savedQuestions[savedQuestionIndex]?.reviewed ?? false);
         setTimeLeft(savedProgress.timeLeft ?? 240 * 60);
-      } else if (!userHasPaidPlan) {
+      } else if (nextAccessType === "free") {
         const fixedQuestions = buildRandomFixedPracticeSet(totalQuestions).map(
           toExamQuestion,
         );
@@ -724,6 +738,16 @@ export default function ExamPage() {
         setQuestions(fixedQuestions);
         questionsRef.current = fixedQuestions;
         setMode("practice");
+      } else {
+        setQuestions([]);
+        questionsRef.current = [];
+        setMode("practice");
+        setDomain("Mixed");
+        setDifficulty("Mixed");
+        setCurrentQuestionIndex(0);
+        setPaletteSegment(0);
+        setShowAnswer(false);
+        setTimeLeft(240 * 60);
       }
 
       setHasLoadedProgress(true);
@@ -733,17 +757,13 @@ export default function ExamPage() {
   }, []);
 
   useEffect(() => {
-    if (isFreeTopicPractice || !hasPaidPlan) {
-      return;
-    }
-
-    if (answeredCount < firstApiTriggerAnswerCount) {
+    if (isFreeTopicPractice || accessType !== "live" || !hasPaidPlan) {
       return;
     }
 
     const targetCount = Math.min(
       activeTotalQuestions,
-      questionNumber + desiredBufferAhead,
+      Math.max(liveInitialBufferCount, questionNumber + desiredBufferAhead),
     );
     const prefetchHandle = window.setTimeout(() => {
       void ensureQuestionBank(targetCount);
@@ -752,6 +772,7 @@ export default function ExamPage() {
     return () => window.clearTimeout(prefetchHandle);
   }, [
     activeTotalQuestions,
+    accessType,
     answeredCount,
     hasPaidPlan,
     ensureQuestionBank,
@@ -787,6 +808,7 @@ export default function ExamPage() {
     window.localStorage.setItem(
       storageKey,
       JSON.stringify({
+        accessType,
         mode,
         domain,
         difficulty,
@@ -796,6 +818,7 @@ export default function ExamPage() {
       }),
     );
   }, [
+    accessType,
     difficulty,
     domain,
     hasLoadedProgress,
@@ -959,7 +982,11 @@ export default function ExamPage() {
           </div>
           <div>
             <p className="exam-overview-label">
-              {isFreeTopicPractice ? "Free Bank" : "Buffered"}
+              {isFreeTopicPractice
+                ? "Free Topic"
+                : accessType === "live"
+                  ? "AI Buffer"
+                  : "Fixed Bank"}
             </p>
             <strong>
               {questions.length}/{activeTotalQuestions}
@@ -1119,7 +1146,11 @@ export default function ExamPage() {
           </div>
           <div className="exam-status-item">
             <span className="exam-status-chip exam-status-chip-pending" />
-            {isFreeTopicPractice ? "Locked Topic" : "Generating"}
+            {isFreeTopicPractice
+              ? "Locked Topic"
+              : accessType === "live"
+                ? "AI Generating"
+                : "Fixed Bank"}
           </div>
           <div className="exam-status-item">
             <span className="exam-status-chip exam-status-chip-answered" />
@@ -1145,6 +1176,13 @@ export default function ExamPage() {
             You are using random questions from the fixed 1000-question practice
             bank. Paid users unlock live PMP practice tests with fresh AI project
             management questions and expanded learning topics.
+          </div>
+        )}
+
+        {!isFreeTopicPractice && accessType === "live" && hasPaidPlan && (
+          <div className="exam-live-note">
+            Live PMP Practice is active. Questions are generated in the
+            background with OpenAI and refreshed for this session.
           </div>
         )}
 
