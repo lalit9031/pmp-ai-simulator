@@ -61,12 +61,25 @@ type SavedProgress = {
 const totalQuestions = 185;
 const freeTopicQuestionCount = 150;
 const palettePageSize = 60;
-const liveInitialBufferCount = 10;
+const liveStoredStarterCount = 25;
+const firstApiTriggerAnswerCount = 10;
 const desiredBufferAhead = 25;
 const storageKey = "pmp-simulator-progress-v1";
 const resultsStorageKey = "pmp-simulator-latest-results-v1";
 const mistakeNotebookStorageKey = "pmp-simulator-mistake-notebook-v1";
 const planStorageKey = "pmp-simulator-plan-v1";
+const freeTopicSlugs = ["agile", "risk", "stakeholder"];
+const paidTopicSlugs = Object.keys(learningTopics);
+const domainOptions: Array<{ label: DomainFilter; paidOnly?: boolean }> = [
+  { label: "Mixed" },
+  { label: "Agile" },
+  { label: "Risk" },
+  { label: "Stakeholder" },
+  { label: "Hybrid", paidOnly: true },
+  { label: "AI Ethics", paidOnly: true },
+  { label: "Sustainability", paidOnly: true },
+  { label: "Business Environment", paidOnly: true },
+];
 const starterQuestions: GeneratedQuestion[] = [
   {
     question:
@@ -547,6 +560,18 @@ function loadPaidPlan() {
   }
 }
 
+function buildStoredPracticeQuestions(accessType: PracticeAccess, count = totalQuestions) {
+  const allowedSlugs = accessType === "live" ? paidTopicSlugs : freeTopicSlugs;
+  return buildRandomFixedPracticeSet(count, allowedSlugs).map(toExamQuestion);
+}
+
+function buildLiveExamStarterQuestions() {
+  return buildRandomFixedPracticeSet(
+    liveStoredStarterCount,
+    paidTopicSlugs,
+  ).map(toExamQuestion);
+}
+
 export default function ExamPage() {
   const router = useRouter();
   const [questions, setQuestions] = useState<ExamQuestion[]>(
@@ -685,11 +710,19 @@ export default function ExamPage() {
       const userHasPaidPlan = loadPaidPlan();
       const nextAccessType: PracticeAccess =
         requestedPlan === "free" || !userHasPaidPlan ? "free" : "live";
+      const canOpenRequestedTopic =
+        requestedTopic !== null &&
+        (userHasPaidPlan || freeTopicSlugs.includes(requestedTopic));
 
       setHasPaidPlan(userHasPaidPlan);
       setAccessType(nextAccessType);
 
-      if (requestedFreeMode && requestedTopic && isSupportedTopic) {
+      if (
+        requestedFreeMode &&
+        requestedTopic &&
+        isSupportedTopic &&
+        canOpenRequestedTopic
+      ) {
         const freeQuestions = buildFreeTopicQuestions(requestedTopic).map(
           toExamQuestion,
         );
@@ -731,17 +764,17 @@ export default function ExamPage() {
         setShowAnswer(savedQuestions[savedQuestionIndex]?.reviewed ?? false);
         setTimeLeft(savedProgress.timeLeft ?? 240 * 60);
       } else if (nextAccessType === "free") {
-        const fixedQuestions = buildRandomFixedPracticeSet(totalQuestions).map(
-          toExamQuestion,
-        );
+        const fixedQuestions = buildStoredPracticeQuestions("free");
 
         setQuestions(fixedQuestions);
         questionsRef.current = fixedQuestions;
         setMode("practice");
       } else {
-        setQuestions([]);
-        questionsRef.current = [];
-        setMode("practice");
+        const starterQuestionsForLiveExam = buildLiveExamStarterQuestions();
+
+        setQuestions(starterQuestionsForLiveExam);
+        questionsRef.current = starterQuestionsForLiveExam;
+        setMode("exam");
         setDomain("Mixed");
         setDifficulty("Mixed");
         setCurrentQuestionIndex(0);
@@ -757,13 +790,22 @@ export default function ExamPage() {
   }, []);
 
   useEffect(() => {
-    if (isFreeTopicPractice || accessType !== "live" || !hasPaidPlan) {
+    if (
+      isFreeTopicPractice ||
+      accessType !== "live" ||
+      !hasPaidPlan ||
+      mode !== "exam"
+    ) {
+      return;
+    }
+
+    if (answeredCount < firstApiTriggerAnswerCount) {
       return;
     }
 
     const targetCount = Math.min(
       activeTotalQuestions,
-      Math.max(liveInitialBufferCount, questionNumber + desiredBufferAhead),
+      questionNumber + desiredBufferAhead,
     );
     const prefetchHandle = window.setTimeout(() => {
       void ensureQuestionBank(targetCount);
@@ -777,6 +819,7 @@ export default function ExamPage() {
     hasPaidPlan,
     ensureQuestionBank,
     isFreeTopicPractice,
+    mode,
     questionNumber,
   ]);
 
@@ -853,6 +896,31 @@ export default function ExamPage() {
       return next;
     });
     setShowAnswer(false);
+  };
+
+  const handleModeChange = (nextMode: ExamMode) => {
+    if (nextMode === mode) {
+      return;
+    }
+
+    if (accessType === "live" && hasPaidPlan) {
+      const nextQuestions =
+        nextMode === "practice"
+          ? buildStoredPracticeQuestions("live")
+          : buildLiveExamStarterQuestions();
+
+      setQuestions(nextQuestions);
+      questionsRef.current = nextQuestions;
+      setMode(nextMode);
+      setCurrentQuestionIndex(0);
+      setPaletteSegment(0);
+      setShowAnswer(false);
+      setTimeLeft(240 * 60);
+      setPrefetchError("");
+      return;
+    }
+
+    setMode(nextMode);
   };
 
   const handleReviewAnswer = () => {
@@ -984,7 +1052,7 @@ export default function ExamPage() {
             <p className="exam-overview-label">
               {isFreeTopicPractice
                 ? "Free Topic"
-                : accessType === "live"
+                : accessType === "live" && mode === "exam"
                   ? "AI Buffer"
                   : "Fixed Bank"}
             </p>
@@ -1010,14 +1078,14 @@ export default function ExamPage() {
             <div className="exam-mode-group" role="group" aria-label="Mode">
               <button
                 type="button"
-                onClick={() => setMode("practice")}
+                onClick={() => handleModeChange("practice")}
                 className={mode === "practice" ? "exam-mode-active" : ""}
               >
                 Learning Practice
               </button>
               <button
                 type="button"
-                onClick={() => setMode("exam")}
+                onClick={() => handleModeChange("exam")}
                 className={mode === "exam" ? "exam-mode-active" : ""}
               >
                 Final Exam
@@ -1041,20 +1109,20 @@ export default function ExamPage() {
                     setDomain(event.target.value as DomainFilter)
                   }
                 >
-                  {[
-                    "Mixed",
-                    "Agile",
-                    "Risk",
-                    "Stakeholder",
-                    "Hybrid",
-                    "AI Ethics",
-                    "Sustainability",
-                    "Business Environment",
-                  ].map((value) => (
-                      <option key={value} value={value}>
-                        {value}
+                  {domainOptions.map((option) => {
+                    const isLocked = option.paidOnly && !hasPaidPlan;
+
+                    return (
+                      <option
+                        key={option.label}
+                        value={option.label}
+                        disabled={isLocked}
+                      >
+                        {option.label}
+                        {isLocked ? " (Paid)" : ""}
                       </option>
-                    ))}
+                    );
+                  })}
                 </select>
               </label>
 
@@ -1148,7 +1216,7 @@ export default function ExamPage() {
             <span className="exam-status-chip exam-status-chip-pending" />
             {isFreeTopicPractice
               ? "Locked Topic"
-              : accessType === "live"
+              : accessType === "live" && mode === "exam"
                 ? "AI Generating"
                 : "Fixed Bank"}
           </div>
@@ -1174,15 +1242,30 @@ export default function ExamPage() {
         {!isFreeTopicPractice && !hasPaidPlan && (
           <div className="exam-plan-note">
             You are using random questions from the fixed 1000-question practice
-            bank. Paid users unlock live PMP practice tests with fresh AI project
-            management questions and expanded learning topics.
+            bank with core free topics. Paid users unlock all stored topics and
+            live PMP exam generation.
           </div>
         )}
 
-        {!isFreeTopicPractice && accessType === "live" && hasPaidPlan && (
+        {!isFreeTopicPractice &&
+          accessType === "live" &&
+          hasPaidPlan &&
+          mode === "practice" && (
+            <div className="exam-live-note">
+              Paid Learning Practice is using the full stored 1000-question bank
+              across all topics, including AI, ESG, sustainability, hybrid, and
+              business value.
+            </div>
+          )}
+
+        {!isFreeTopicPractice &&
+          accessType === "live" &&
+          hasPaidPlan &&
+          mode === "exam" && (
           <div className="exam-live-note">
-            Live PMP Practice is active. Questions are generated in the
-            background with OpenAI and refreshed for this session.
+            Live PMP Exam is active. The first 25 questions come from the stored
+            bank; after you answer 10 questions, new AI questions load in the
+            background to save tokens and buffer time.
           </div>
         )}
 

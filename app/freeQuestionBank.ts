@@ -280,8 +280,12 @@ export function buildFreeTopicQuestions(topicSlug: string): FreeQuestion[] {
   });
 }
 
-export function buildFixedPracticeQuestions(count = 1000): FreeQuestion[] {
-  const slugs = Object.keys(learningTopics);
+export function buildFixedPracticeQuestions(
+  count = 1000,
+  allowedSlugs = Object.keys(learningTopics),
+): FreeQuestion[] {
+  const slugs = allowedSlugs.length ? allowedSlugs : Object.keys(learningTopics);
+
   return Array.from({ length: count }, (_, index) => {
     const topicSlug = slugs[index % slugs.length];
     const topicQuestions = buildFreeTopicQuestions(topicSlug);
@@ -295,8 +299,11 @@ export function buildFixedPracticeQuestions(count = 1000): FreeQuestion[] {
   });
 }
 
-export function buildRandomFixedPracticeSet(count: number) {
-  const bank = buildFixedPracticeQuestions(1000);
+export function buildRandomFixedPracticeSet(
+  count: number,
+  allowedSlugs = Object.keys(learningTopics),
+) {
+  const bank = buildFixedPracticeQuestions(1000, allowedSlugs);
   const shuffled = [...bank].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
