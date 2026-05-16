@@ -262,7 +262,7 @@ export function buildFreeTopicQuestions(topicSlug: string): FreeQuestion[] {
     const questionNumber = index + 1;
 
     return {
-      question: `Topic practice ${questionNumber}: During a PMP-style project scenario, ${scenario}. What should the project manager do first?`,
+      question: `During a PMP-style project scenario, ${scenario}. What should the project manager do first?`,
       options,
       correctAnswer,
       explanation: template.explanation,
@@ -293,7 +293,7 @@ export function buildFixedPracticeQuestions(
 
     return {
       ...baseQuestion,
-      question: `Practice bank ${index + 1}: ${baseQuestion.question.replace(/^Topic practice \d+: /, "")}`,
+      question: baseQuestion.question,
       source: "fixed-1000-bank",
     };
   });

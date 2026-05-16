@@ -10,6 +10,7 @@ type ResultQuestion = {
   isCorrect?: boolean;
   markedForReview?: boolean;
   domain?: string;
+  topic?: string;
   difficulty?: string;
 };
 
@@ -27,6 +28,12 @@ type LatestResults = {
 };
 
 const resultsStorageKey = "pmp-simulator-latest-results-v1";
+const weakAreaStorageKey = "pmp-simulator-weak-area-stats-v1";
+
+type WeakAreaStats = Record<
+  string,
+  { domain: string; topic: string; attempts: number; correct: number; mistakes: number }
+>;
 
 function getQuestionDomain(question: ResultQuestion) {
   if (question.domain && question.domain !== "Mixed") {
@@ -54,6 +61,14 @@ function getQuestionDomain(question: ResultQuestion) {
   return "General";
 }
 
+function getQuestionTopic(question: ResultQuestion) {
+  if (question.topic) {
+    return question.topic;
+  }
+
+  return getQuestionDomain(question);
+}
+
 function getReadiness(percentage: number, answeredCount: number) {
   if (answeredCount < 20) {
     return "Needs more data";
@@ -72,13 +87,19 @@ function getReadiness(percentage: number, answeredCount: number) {
 
 export default function ResultsPage() {
   const [results, setResults] = useState<LatestResults | null>(null);
+  const [weakAreaStats, setWeakAreaStats] = useState<WeakAreaStats>({});
 
   useEffect(() => {
     const loadHandle = window.setTimeout(() => {
       const savedResults = window.localStorage.getItem(resultsStorageKey);
+      const savedWeakAreaStats = window.localStorage.getItem(weakAreaStorageKey);
 
       if (savedResults) {
         setResults(JSON.parse(savedResults) as LatestResults);
+      }
+
+      if (savedWeakAreaStats) {
+        setWeakAreaStats(JSON.parse(savedWeakAreaStats) as WeakAreaStats);
       }
     }, 0);
 
@@ -121,6 +142,27 @@ export default function ResultsPage() {
       (left, right) =>
         right.correct / right.total - left.correct / left.total,
     );
+    const topicRows = Object.values(
+      answeredQuestions.reduce<
+        Record<string, { topic: string; domain: string; correct: number; total: number }>
+      >((groups, question) => {
+        const topic = getQuestionTopic(question);
+        const domain = getQuestionDomain(question);
+
+        groups[topic] ??= { topic, domain, correct: 0, total: 0 };
+        groups[topic].total += 1;
+
+        if (question.isCorrect) {
+          groups[topic].correct += 1;
+        }
+
+        return groups;
+      }, {}),
+    );
+    const sortedTopics = [...topicRows].sort(
+      (left, right) => left.correct / left.total - right.correct / right.total,
+    );
+    const recommendation = sortedTopics[0];
 
     return {
       score,
@@ -129,6 +171,8 @@ export default function ResultsPage() {
       readiness: getReadiness(percentage, answeredCount),
       strengths: sortedDomains.slice(0, 2),
       weakAreas: sortedDomains.slice(-2).reverse(),
+      topicWeakAreas: sortedTopics.slice(0, 3),
+      recommendation,
       domainRows,
       markedCount: results.questions.filter((question) => question.markedForReview)
         .length,
@@ -169,14 +213,14 @@ export default function ResultsPage() {
 
         <div className="results-score-grid">
           <div>
+            <p>PMP Readiness</p>
+            <strong>{summary.percentage}%</strong>
+          </div>
+          <div>
             <p>Score</p>
             <strong>
               {summary.score}/{summary.answeredCount || results.totalQuestions}
             </strong>
-          </div>
-          <div>
-            <p>Percentage</p>
-            <strong>{summary.percentage}%</strong>
           </div>
           <div>
             <p>Answered</p>
@@ -218,6 +262,47 @@ export default function ResultsPage() {
           </section>
         </div>
 
+        <section className="results-recommendation">
+          <div>
+            <p className="intro-eyebrow">Recommendation</p>
+            <h2>
+              Study{" "}
+              {summary.recommendation?.topic ??
+                summary.weakAreas[0]?.domain ??
+                "one focused topic"}
+              .
+            </h2>
+            <p>
+              Your next best improvement area is based on missed answers,
+              topic accuracy, and recent practice history.
+            </p>
+          </div>
+          <Link href="/learn" className="intro-primary-action">
+            Open Learning Hub
+          </Link>
+        </section>
+
+        <section className="results-domain-table">
+          <h2>You Struggle With</h2>
+          {summary.topicWeakAreas.length ? (
+            summary.topicWeakAreas.map((row) => {
+              const topicPercent = Math.round((row.correct / row.total) * 100);
+
+              return (
+                <div key={row.topic} className="results-domain-row">
+                  <span>{row.topic}</span>
+                  <strong>{topicPercent}%</strong>
+                  <div className="results-domain-track" aria-hidden="true">
+                    <span style={{ width: `${topicPercent}%` }} />
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p>Answer more questions to build weak-area tracking.</p>
+          )}
+        </section>
+
         <section className="results-domain-table">
           <h2>Domain Breakdown</h2>
           {summary.domainRows.map((row) => {
@@ -235,6 +320,32 @@ export default function ResultsPage() {
               </div>
             );
           })}
+        </section>
+
+        <section className="results-domain-table">
+          <h2>Long-Term Weak Area Tracking</h2>
+          {Object.values(weakAreaStats).length ? (
+            Object.values(weakAreaStats)
+              .sort((left, right) => right.mistakes - left.mistakes)
+              .slice(0, 5)
+              .map((row) => {
+                const accuracy = Math.round((row.correct / row.attempts) * 100);
+
+                return (
+                  <div key={row.topic} className="results-domain-row">
+                    <span>{row.topic}</span>
+                    <strong>
+                      {row.mistakes} mistakes · {accuracy}%
+                    </strong>
+                    <div className="results-domain-track" aria-hidden="true">
+                      <span style={{ width: `${accuracy}%` }} />
+                    </div>
+                  </div>
+                );
+              })
+          ) : (
+            <p>Complete a practice session to start tracking weak areas.</p>
+          )}
         </section>
       </section>
     </main>

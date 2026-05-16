@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { learningTopics } from "../learningTopics";
 
 const planStorageKey = "pmp-simulator-plan-v1";
-const freeTopicSlugs = ["agile", "risk", "stakeholder"];
+const freeTopicSlugs = ["agile", "risk", "stakeholder", "hybrid"];
 
 function isPaidPlanActive() {
   const plan = window.localStorage.getItem(planStorageKey);
@@ -26,10 +26,9 @@ export default function LearnPage() {
           <p className="intro-eyebrow">Learning Hub</p>
           <h1>Study the PMP logic behind your mistakes.</h1>
           <p>
-            Topic guides now include agile, risk, stakeholders, hybrid delivery,
-            ethical AI, sustainability, ESG, value delivery, and business
-            environment thinking. Each topic connects to 150 practice questions
-            across easy, medium, and hard difficulty.
+            Free users get four core PMP topics. Paid users unlock ethical AI,
+            sustainability, ESG, value delivery, business environment thinking,
+            and the complete topic library.
           </p>
         </div>
 

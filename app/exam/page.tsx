@@ -46,6 +46,8 @@ type FreeTopicSlug = string;
 type PracticeAccess = "free" | "live";
 type SavedProgress = {
   accessType?: PracticeAccess;
+  isFreeTopicPractice?: boolean;
+  freeTopicSlug?: FreeTopicSlug | null;
   mode?: ExamMode;
   domain?: DomainFilter;
   difficulty?: DifficultyFilter;
@@ -56,6 +58,7 @@ type SavedProgress = {
   reviewedAnswers?: Record<number, boolean>;
   markedForReview?: Record<number, boolean>;
   timeLeft?: number;
+  score?: number;
 };
 
 const totalQuestions = 185;
@@ -67,15 +70,16 @@ const desiredBufferAhead = 25;
 const storageKey = "pmp-simulator-progress-v1";
 const resultsStorageKey = "pmp-simulator-latest-results-v1";
 const mistakeNotebookStorageKey = "pmp-simulator-mistake-notebook-v1";
+const weakAreaStorageKey = "pmp-simulator-weak-area-stats-v1";
 const planStorageKey = "pmp-simulator-plan-v1";
-const freeTopicSlugs = ["agile", "risk", "stakeholder"];
+const freeTopicSlugs = ["agile", "risk", "stakeholder", "hybrid"];
 const paidTopicSlugs = Object.keys(learningTopics);
 const domainOptions: Array<{ label: DomainFilter; paidOnly?: boolean }> = [
   { label: "Mixed" },
   { label: "Agile" },
   { label: "Risk" },
   { label: "Stakeholder" },
-  { label: "Hybrid", paidOnly: true },
+  { label: "Hybrid" },
   { label: "AI Ethics", paidOnly: true },
   { label: "Sustainability", paidOnly: true },
   { label: "Business Environment", paidOnly: true },
@@ -572,6 +576,58 @@ function buildLiveExamStarterQuestions() {
   ).map(toExamQuestion);
 }
 
+function cleanUserQuestionText(question: string) {
+  return question
+    .replace(/^Practice bank \d+:\s*/i, "")
+    .replace(/^Topic practice \d+:\s*/i, "")
+    .trim();
+}
+
+function saveWeakAreaStats(questions: ExamQuestion[]) {
+  const answeredQuestions = questions.filter(
+    (question) => question.selectedAnswer !== undefined,
+  );
+
+  if (!answeredQuestions.length) {
+    return;
+  }
+
+  try {
+    const existingStats = window.localStorage.getItem(weakAreaStorageKey);
+    const stats = existingStats
+      ? (JSON.parse(existingStats) as Record<
+          string,
+          { domain: string; topic: string; attempts: number; correct: number; mistakes: number }
+        >)
+      : {};
+
+    answeredQuestions.forEach((question) => {
+      const topic = getLearningTopicForQuestion(question);
+      const key = topic.slug;
+
+      stats[key] ??= {
+        domain: topic.domain,
+        topic: topic.title,
+        attempts: 0,
+        correct: 0,
+        mistakes: 0,
+      };
+
+      stats[key].attempts += 1;
+
+      if (question.isCorrect) {
+        stats[key].correct += 1;
+      } else {
+        stats[key].mistakes += 1;
+      }
+    });
+
+    window.localStorage.setItem(weakAreaStorageKey, JSON.stringify(stats));
+  } catch {
+    // Analytics should not block results submission.
+  }
+}
+
 export default function ExamPage() {
   const router = useRouter();
   const [questions, setQuestions] = useState<ExamQuestion[]>(
@@ -759,6 +815,8 @@ export default function ExamPage() {
         setMode(savedProgress.mode ?? "practice");
         setDomain(savedProgress.domain ?? "Mixed");
         setDifficulty(savedProgress.difficulty ?? "Mixed");
+        setFreeTopicSlug(savedProgress.freeTopicSlug ?? null);
+        setIsFreeTopicPractice(savedProgress.isFreeTopicPractice ?? false);
         setCurrentQuestionIndex(savedQuestionIndex);
         setPaletteSegment(Math.floor(savedQuestionIndex / palettePageSize));
         setShowAnswer(savedQuestions[savedQuestionIndex]?.reviewed ?? false);
@@ -844,7 +902,7 @@ export default function ExamPage() {
   }, [mode]);
 
   useEffect(() => {
-    if (!hasLoadedProgress || isFreeTopicPractice) {
+    if (!hasLoadedProgress) {
       return;
     }
 
@@ -852,23 +910,28 @@ export default function ExamPage() {
       storageKey,
       JSON.stringify({
         accessType,
+        isFreeTopicPractice,
+        freeTopicSlug,
         mode,
         domain,
         difficulty,
         questions,
         questionNumber,
         timeLeft,
+        score,
       }),
     );
   }, [
     accessType,
     difficulty,
     domain,
+    freeTopicSlug,
     hasLoadedProgress,
     isFreeTopicPractice,
     mode,
     questions,
     questionNumber,
+    score,
     timeLeft,
   ]);
 
@@ -995,6 +1058,12 @@ export default function ExamPage() {
 
   const handleSubmitExam = () => {
     const finishedAt = new Date().toISOString();
+    const cleanedQuestions = questions.map((question) => ({
+      ...question,
+      question: cleanUserQuestionText(question.question),
+    }));
+
+    saveWeakAreaStats(cleanedQuestions);
 
     window.localStorage.setItem(
       resultsStorageKey,
@@ -1004,7 +1073,7 @@ export default function ExamPage() {
         difficulty,
         freeTopicSlug,
         isFreeTopicPractice,
-        questions,
+        questions: cleanedQuestions,
         score,
         answeredCount,
         availableQuestions: questions.length,
@@ -1053,8 +1122,8 @@ export default function ExamPage() {
               {isFreeTopicPractice
                 ? "Free Topic"
                 : accessType === "live" && mode === "exam"
-                  ? "AI Buffer"
-                  : "Fixed Bank"}
+                  ? "Live Set"
+                  : "Practice Set"}
             </p>
             <strong>
               {questions.length}/{activeTotalQuestions}
@@ -1217,8 +1286,8 @@ export default function ExamPage() {
             {isFreeTopicPractice
               ? "Locked Topic"
               : accessType === "live" && mode === "exam"
-                ? "AI Generating"
-                : "Fixed Bank"}
+                ? "Preparing"
+                : "Available"}
           </div>
           <div className="exam-status-item">
             <span className="exam-status-chip exam-status-chip-answered" />
@@ -1241,9 +1310,8 @@ export default function ExamPage() {
 
         {!isFreeTopicPractice && !hasPaidPlan && (
           <div className="exam-plan-note">
-            You are using random questions from the fixed 1000-question practice
-            bank with core free topics. Paid users unlock all stored topics and
-            live PMP exam generation.
+            Free practice includes four core PMP topics. Paid users unlock every
+            topic and live PMP exam practice.
           </div>
         )}
 
@@ -1252,9 +1320,8 @@ export default function ExamPage() {
           hasPaidPlan &&
           mode === "practice" && (
             <div className="exam-live-note">
-              Paid Learning Practice is using the full stored 1000-question bank
-              across all topics, including AI, ESG, sustainability, hybrid, and
-              business value.
+              Paid Learning Practice includes the full PMP topic library,
+              including AI, ESG, sustainability, hybrid, and business value.
             </div>
           )}
 
@@ -1263,9 +1330,8 @@ export default function ExamPage() {
           hasPaidPlan &&
           mode === "exam" && (
           <div className="exam-live-note">
-            Live PMP Exam is active. The first 25 questions come from the stored
-            bank; after you answer 10 questions, new AI questions load in the
-            background to save tokens and buffer time.
+            Live PMP Exam is active. New adaptive questions are prepared as you
+            progress through the exam.
           </div>
         )}
 
@@ -1311,9 +1377,6 @@ export default function ExamPage() {
                 <div className="exam-question-meta">
                   <h1 className="exam-muted-title">
                     Question {questionNumber}
-                    {currentQuestion.source && (
-                      <span> (Source: {currentQuestion.source})</span>
-                    )}
                   </h1>
                   {showAnswer && selectedOption !== null && (
                     <span
@@ -1328,7 +1391,9 @@ export default function ExamPage() {
                   )}
                 </div>
 
-                <h2 className="exam-question">{currentQuestion.question}</h2>
+                <h2 className="exam-question">
+                  {cleanUserQuestionText(currentQuestion.question)}
+                </h2>
               </div>
 
               <div className="exam-options">
