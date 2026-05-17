@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   FaArrowRight,
   FaBookOpen,
@@ -38,7 +41,35 @@ const routeCards = [
   },
 ];
 
+const userStorageKey = "pmp-simulator-user-v1";
+const planStorageKey = "pmp-simulator-plan-v1";
+
+function isPaidPlan(plan: string | null) {
+  return plan === "founder" || plan === "annual" || plan === "global";
+}
+
 export default function IntroPage() {
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [hasPaidPlan, setHasPaidPlan] = useState(false);
+
+  useEffect(() => {
+    const loadHandle = window.setTimeout(() => {
+      const user = window.localStorage.getItem(userStorageKey);
+      const plan = window.localStorage.getItem(planStorageKey);
+
+      setIsSignedIn(Boolean(user));
+      setHasPaidPlan(isPaidPlan(plan));
+    }, 0);
+
+    return () => window.clearTimeout(loadHandle);
+  }, []);
+
+  const startExamHref = isSignedIn
+    ? hasPaidPlan
+      ? "/exam?plan=live&fresh=1"
+      : "/exam?plan=free&fresh=1"
+    : "/login?next=%2Fexam%3Fplan%3Dfree%26fresh%3D1";
+
   return (
     <main className="intro-page">
       <nav className="intro-nav" aria-label="Primary navigation">
@@ -62,11 +93,12 @@ export default function IntroPage() {
           <p className="intro-eyebrow">PMI-style practice environment</p>
           <h1>PMP Simulator</h1>
           <p className="intro-lede">
-            Practice from a fixed 1000-question bank, study weak topics, and
-            unlock live AI-generated PMP scenarios with the paid plan.
+            Sign in to start the free PMP plan with four learning topics,
+            saved progress, results analytics, and upgrade when you are ready
+            for the live full-version simulator.
           </p>
           <div className="intro-actions">
-            <Link href="/exam" className="intro-primary-action">
+            <Link href={startExamHref} className="intro-primary-action">
               Start Exam
               <FaArrowRight aria-hidden="true" />
             </Link>
@@ -99,26 +131,27 @@ export default function IntroPage() {
       <section className="intro-offer" aria-label="Practice plans">
         <div>
           <span>Free practice</span>
-          <strong>1000 fixed questions</strong>
+          <strong>4 core topics included</strong>
           <p>
-            Learning topics include 150-question sets with easy, medium, and
-            hard difficulty. Practice mode draws random questions from the fixed
-            bank.
+            Signed-in learners can read, test, and practice Agile, Risk,
+            Stakeholder, and Hybrid topics with saved browser progress.
           </p>
         </div>
         <div>
           <span>Paid live test</span>
           <strong>AI PMP questions</strong>
           <p>
-            Paid users get fresh project management questions, AI-assisted topic
-            expansion, ethical AI, sustainability, ESG, and value delivery
-            coverage.
+            Subscribe to unlock the live simulator, all PMP topics, AI,
+            sustainability, ESG, business value, and full-version practice.
           </p>
         </div>
         <div>
           <span>Founder price</span>
-          <strong>Rs. 199 first 100 users</strong>
-          <p>After the first 100 paid users, annual access becomes Rs. 399.</p>
+          <strong>Rs. 199 India · $3 global</strong>
+          <p>
+            First 100 India users get Rs. 199 access. Learners outside India
+            can unlock the full version for $3.
+          </p>
         </div>
       </section>
 

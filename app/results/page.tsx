@@ -29,6 +29,7 @@ type LatestResults = {
 
 const resultsStorageKey = "pmp-simulator-latest-results-v1";
 const weakAreaStorageKey = "pmp-simulator-weak-area-stats-v1";
+const planStorageKey = "pmp-simulator-plan-v1";
 
 type WeakAreaStats = Record<
   string,
@@ -85,14 +86,22 @@ function getReadiness(percentage: number, answeredCount: number) {
   return "Needs focused practice";
 }
 
+function isPaidPlan(plan: string | null) {
+  return plan === "founder" || plan === "annual" || plan === "global";
+}
+
 export default function ResultsPage() {
   const [results, setResults] = useState<LatestResults | null>(null);
   const [weakAreaStats, setWeakAreaStats] = useState<WeakAreaStats>({});
+  const [hasPaidPlan, setHasPaidPlan] = useState(false);
 
   useEffect(() => {
     const loadHandle = window.setTimeout(() => {
       const savedResults = window.localStorage.getItem(resultsStorageKey);
       const savedWeakAreaStats = window.localStorage.getItem(weakAreaStorageKey);
+      const savedPlan = window.localStorage.getItem(planStorageKey);
+
+      setHasPaidPlan(isPaidPlan(savedPlan));
 
       if (savedResults) {
         setResults(JSON.parse(savedResults) as LatestResults);
@@ -167,6 +176,7 @@ export default function ResultsPage() {
     return {
       score,
       answeredCount,
+      incorrectCount: answeredCount - score,
       percentage,
       readiness: getReadiness(percentage, answeredCount),
       strengths: sortedDomains.slice(0, 2),
@@ -185,10 +195,21 @@ export default function ResultsPage() {
         <section className="coming-shell">
           <p className="intro-eyebrow">Final Results</p>
           <h1>No completed attempt yet.</h1>
-          <p>Submit an exam or practice session to see your score summary.</p>
-          <Link href="/exam" className="intro-primary-action">
-            Start Practice
+          <p>
+            Submit a practice session to see readiness, strong areas, weak
+            areas, and your next learning recommendation.
+          </p>
+          <Link
+            href={hasPaidPlan ? "/exam?plan=live&fresh=1" : "/pricing"}
+            className="intro-primary-action"
+          >
+            {hasPaidPlan ? "Start Live Simulator" : "Take Paid Plan"}
           </Link>
+          {!hasPaidPlan && (
+            <Link href="/learn" className="intro-secondary-action coming-secondary">
+              Use Free Topics
+            </Link>
+          )}
         </section>
       </main>
     );
@@ -206,21 +227,28 @@ export default function ResultsPage() {
               {results.domain ?? "Mixed"} · {results.difficulty ?? "Mixed"}
             </p>
           </div>
-          <Link href="/exam" className="intro-primary-action">
-            Continue Practice
+          <Link
+            href={hasPaidPlan ? "/exam?plan=live&fresh=1" : "/pricing"}
+            className="intro-primary-action"
+          >
+            {hasPaidPlan ? "Continue Live Simulator" : "Unlock Full Version"}
           </Link>
         </div>
 
         <div className="results-score-grid">
           <div>
-            <p>PMP Readiness</p>
+            <p>PMP Readiness Score</p>
             <strong>{summary.percentage}%</strong>
           </div>
           <div>
-            <p>Score</p>
+            <p>Correct Answers</p>
             <strong>
               {summary.score}/{summary.answeredCount || results.totalQuestions}
             </strong>
+          </div>
+          <div>
+            <p>Incorrect Answers</p>
+            <strong>{summary.incorrectCount}</strong>
           </div>
           <div>
             <p>Answered</p>

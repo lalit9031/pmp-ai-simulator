@@ -11,10 +11,15 @@ const paidUsersStorageKey = "pmp-simulator-paid-users-v1";
 const paidFeatures = [
   "Live PMP practice test with fresh AI project management questions",
   "185-question, 240-minute exam format",
+  "All PMP learning topics beyond the four free core topics",
   "Ethical AI, AI-assisted decision making, ESG, and sustainability topics",
   "Business value, strategy alignment, and benefits realization coverage",
   "New learning topics added as the PMP exam changes",
 ];
+
+function isPaidPlan(plan: string | null) {
+  return plan === "founder" || plan === "annual" || plan === "global";
+}
 
 export default function PricingPage() {
   const router = useRouter();
@@ -22,22 +27,32 @@ export default function PricingPage() {
   const [activePlan, setActivePlan] = useState<string | null>(null);
 
   useEffect(() => {
-    setPaidUsers(Number(window.localStorage.getItem(paidUsersStorageKey) ?? 0));
-    setActivePlan(window.localStorage.getItem(planStorageKey));
+    const loadHandle = window.setTimeout(() => {
+      setPaidUsers(
+        Number(window.localStorage.getItem(paidUsersStorageKey) ?? 0),
+      );
+      setActivePlan(window.localStorage.getItem(planStorageKey));
+    }, 0);
+
+    return () => window.clearTimeout(loadHandle);
   }, []);
 
   const founderAvailable = paidUsers < 100;
   const currentPrice = founderAvailable ? 199 : 399;
   const currentPlan = founderAvailable ? "founder" : "annual";
 
-  const handleCheckout = () => {
-    window.localStorage.setItem(planStorageKey, currentPlan);
-    window.localStorage.setItem(
-      paidUsersStorageKey,
-      String(Math.min(100, paidUsers + 1)),
-    );
-    setActivePlan(currentPlan);
-    setPaidUsers((value) => Math.min(100, value + 1));
+  const handleCheckout = (plan: string) => {
+    window.localStorage.setItem(planStorageKey, plan);
+
+    if (plan !== "global") {
+      window.localStorage.setItem(
+        paidUsersStorageKey,
+        String(Math.min(100, paidUsers + 1)),
+      );
+      setPaidUsers((value) => Math.min(100, value + 1));
+    }
+
+    setActivePlan(plan);
     window.localStorage.removeItem("pmp-simulator-progress-v1");
     router.push("/exam?plan=live&fresh=1");
   };
@@ -71,10 +86,14 @@ export default function PricingPage() {
             <h2>Free Practice</h2>
             <div className="pricing-price">Rs. 0</div>
             <p>
-              Fixed 1000-question PMP practice bank with random practice sets
-              and 150 learning questions per topic.
+              Sign in and access four core PMP topics: Agile, Risk,
+              Stakeholder, and Hybrid. Read, test, and practice before
+              upgrading.
             </p>
-            <Link href="/exam?plan=free&fresh=1" className="intro-secondary-action">
+            <Link
+              href="/exam?plan=free&fresh=1"
+              className="intro-secondary-action"
+            >
               Start free practice
             </Link>
           </section>
@@ -89,15 +108,24 @@ export default function PricingPage() {
               {founderAvailable
                 ? `${100 - paidUsers} founder seats left at Rs. 199.`
                 : "Founder pricing is complete. Annual access is Rs. 399."}
+              {" "}Outside India, full-version access is $3.
             </p>
 
             <button
               type="button"
-              onClick={handleCheckout}
+              onClick={() => handleCheckout(currentPlan)}
               className="intro-primary-action pricing-button"
             >
               <FaLockOpen aria-hidden="true" />
-              {activePlan ? "Plan active" : "Pay and unlock"}
+              {isPaidPlan(activePlan) ? "Plan active" : "Pay Rs. and unlock"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleCheckout("global")}
+              className="intro-secondary-action pricing-button pricing-global-button"
+            >
+              Pay $3 outside India
             </button>
 
             <ul className="pricing-feature-list">

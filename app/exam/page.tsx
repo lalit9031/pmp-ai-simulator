@@ -7,6 +7,7 @@ import {
   buildFreeTopicQuestions,
   buildRandomFixedPracticeSet,
 } from "../freeQuestionBank";
+import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { getLearningTopicForQuestion, learningTopics } from "../learningTopics";
 
 type GeneratedQuestion = {
@@ -72,6 +73,7 @@ const resultsStorageKey = "pmp-simulator-latest-results-v1";
 const mistakeNotebookStorageKey = "pmp-simulator-mistake-notebook-v1";
 const weakAreaStorageKey = "pmp-simulator-weak-area-stats-v1";
 const planStorageKey = "pmp-simulator-plan-v1";
+const userStorageKey = "pmp-simulator-user-v1";
 const freeTopicSlugs = ["agile", "risk", "stakeholder", "hybrid"];
 const paidTopicSlugs = Object.keys(learningTopics);
 const domainOptions: Array<{ label: DomainFilter; paidOnly?: boolean }> = [
@@ -513,12 +515,13 @@ function saveMistakeToNotebook(question: ExamQuestion, selectedAnswer: number) {
   const topic = getLearningTopicForQuestion(question);
   const mistake = {
     id: `${question.id}-${Date.now()}`,
-    question: question.question,
+    question: cleanUserQuestionText(question.question),
     selectedAnswer,
     correctAnswer: question.correctAnswer,
     explanation: question.explanation,
     domain: topic.domain,
     topic: topic.title,
+    difficulty: question.difficulty ?? "Mixed",
     learningPath: `/learn/${topic.slug}`,
     savedAt: new Date().toISOString(),
   };
@@ -536,6 +539,18 @@ function saveMistakeToNotebook(question: ExamQuestion, selectedAnswer: number) {
   } catch {
     // Learning recommendations should never block answer review.
   }
+}
+
+function saveIncorrectAnswersToNotebook(questions: ExamQuestion[]) {
+  questions
+    .filter(
+      (question) =>
+        question.selectedAnswer !== undefined &&
+        question.selectedAnswer !== question.correctAnswer,
+    )
+    .forEach((question) => {
+      saveMistakeToNotebook(question, question.selectedAnswer as number);
+    });
 }
 
 function loadSavedProgress(): SavedProgress | null {
@@ -558,7 +573,19 @@ function loadPaidPlan() {
 
   try {
     const plan = window.localStorage.getItem(planStorageKey);
-    return plan === "founder" || plan === "annual";
+    return plan === "founder" || plan === "annual" || plan === "global";
+  } catch {
+    return false;
+  }
+}
+
+function loadSignedInUser() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    return Boolean(window.localStorage.getItem(userStorageKey));
   } catch {
     return false;
   }
@@ -628,6 +655,82 @@ function saveWeakAreaStats(questions: ExamQuestion[]) {
   }
 }
 
+async function saveExamToDatabase(
+  questions: ExamQuestion[],
+  result: {
+    mode: ExamMode;
+    domain: DomainFilter;
+    difficulty: DifficultyFilter;
+    score: number;
+    answeredCount: number;
+    totalQuestions: number;
+    timeLeft: number;
+  },
+) {
+  const supabase = getSupabaseBrowserClient();
+
+  if (!supabase) {
+    return;
+  }
+
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData.user;
+
+  if (!user) {
+    return;
+  }
+
+  const correctCount = questions.filter((question) => question.isCorrect).length;
+  const incorrectCount = result.answeredCount - correctCount;
+  const percentage = result.answeredCount
+    ? Math.round((correctCount / result.answeredCount) * 100)
+    : 0;
+
+  const { data: exam, error: examError } = await supabase
+    .from("exams")
+    .insert({
+      user_id: user.id,
+      mode: result.mode,
+      domain: result.domain,
+      difficulty: result.difficulty,
+      score: result.score,
+      percentage,
+      answered_count: result.answeredCount,
+      correct_count: correctCount,
+      incorrect_count: incorrectCount,
+      total_questions: result.totalQuestions,
+      time_left: result.timeLeft,
+    })
+    .select("id")
+    .single();
+
+  if (examError || !exam) {
+    return;
+  }
+
+  const answerRows = questions
+    .filter((question) => question.selectedAnswer !== undefined)
+    .map((question) => {
+      const topic = getLearningTopicForQuestion(question);
+
+      return {
+        exam_id: exam.id,
+        user_id: user.id,
+        question: cleanUserQuestionText(question.question),
+        selected_answer: question.selectedAnswer,
+        correct_answer: question.correctAnswer,
+        is_correct: question.isCorrect === true,
+        topic: topic.title,
+        domain: topic.domain,
+        difficulty: question.difficulty ?? "Mixed",
+      };
+    });
+
+  if (answerRows.length) {
+    await supabase.from("answers").insert(answerRows);
+  }
+}
+
 export default function ExamPage() {
   const router = useRouter();
   const [questions, setQuestions] = useState<ExamQuestion[]>(
@@ -661,6 +764,9 @@ export default function ExamPage() {
   ).length;
   const markedCount = questions.filter((question) => question.markedForReview)
     .length;
+  const visibleDomainOptions = hasPaidPlan
+    ? domainOptions
+    : domainOptions.filter((option) => !option.paidOnly);
   const isCurrentCorrect =
     currentQuestion &&
     selectedOption !== null &&
@@ -755,6 +861,12 @@ export default function ExamPage() {
 
   useEffect(() => {
     const loadHandle = window.setTimeout(() => {
+      if (!loadSignedInUser()) {
+        const nextPath = `${window.location.pathname}${window.location.search}`;
+        router.replace(`/login?next=${encodeURIComponent(nextPath)}`);
+        return;
+      }
+
       const params = new URLSearchParams(window.location.search);
       const requestedTopic = params.get("topic") as FreeTopicSlug | null;
       const requestedFreeMode = params.get("free") === "1";
@@ -845,7 +957,7 @@ export default function ExamPage() {
     }, 0);
 
     return () => window.clearTimeout(loadHandle);
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (
@@ -906,6 +1018,37 @@ export default function ExamPage() {
       return;
     }
 
+    const selectedAnswers = questions.reduce<Record<number, number>>(
+      (answers, question, index) => {
+        if (question.selectedAnswer !== undefined) {
+          answers[index] = question.selectedAnswer;
+        }
+
+        return answers;
+      },
+      {},
+    );
+    const reviewedAnswers = questions.reduce<Record<number, boolean>>(
+      (answers, question, index) => {
+        if (question.reviewed) {
+          answers[index] = true;
+        }
+
+        return answers;
+      },
+      {},
+    );
+    const markedForReview = questions.reduce<Record<number, boolean>>(
+      (answers, question, index) => {
+        if (question.markedForReview) {
+          answers[index] = true;
+        }
+
+        return answers;
+      },
+      {},
+    );
+
     window.localStorage.setItem(
       storageKey,
       JSON.stringify({
@@ -917,6 +1060,9 @@ export default function ExamPage() {
         difficulty,
         questions,
         questionNumber,
+        selectedAnswers,
+        reviewedAnswers,
+        markedForReview,
         timeLeft,
         score,
       }),
@@ -1064,6 +1210,16 @@ export default function ExamPage() {
     }));
 
     saveWeakAreaStats(cleanedQuestions);
+    saveIncorrectAnswersToNotebook(cleanedQuestions);
+    void saveExamToDatabase(cleanedQuestions, {
+      mode,
+      domain,
+      difficulty,
+      score,
+      answeredCount,
+      totalQuestions: activeTotalQuestions,
+      timeLeft,
+    });
 
     window.localStorage.setItem(
       resultsStorageKey,
@@ -1178,20 +1334,11 @@ export default function ExamPage() {
                     setDomain(event.target.value as DomainFilter)
                   }
                 >
-                  {domainOptions.map((option) => {
-                    const isLocked = option.paidOnly && !hasPaidPlan;
-
-                    return (
-                      <option
-                        key={option.label}
-                        value={option.label}
-                        disabled={isLocked}
-                      >
-                        {option.label}
-                        {isLocked ? " (Paid)" : ""}
-                      </option>
-                    );
-                  })}
+                  {visibleDomainOptions.map((option) => (
+                    <option key={option.label} value={option.label}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </label>
 

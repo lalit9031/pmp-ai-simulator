@@ -259,8 +259,6 @@ export function buildFreeTopicQuestions(topicSlug: string): FreeQuestion[] {
       template.wrong,
       index,
     );
-    const questionNumber = index + 1;
-
     return {
       question: `During a PMP-style project scenario, ${scenario}. What should the project manager do first?`,
       options,
