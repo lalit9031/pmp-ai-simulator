@@ -1,10 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 const fallbackQuestion = {
   question:
     "A hybrid project team is struggling because agile team members want frequent backlog changes while the predictive team needs stable requirements for compliance deliverables. What should the project manager do first?",
@@ -53,6 +49,10 @@ export async function GET(request: Request) {
         warning: "OPENAI_API_KEY is not configured. Returned fallback question.",
       });
     }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
     const prompt = `
 Generate one PMP-style ${difficulty.toLowerCase()} question for ${domain} PMP practice.

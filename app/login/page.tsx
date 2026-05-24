@@ -94,7 +94,7 @@ export default function LoginPage() {
 
     if (!supabase || !isSupabaseConfigured()) {
       setAuthError(
-        "Supabase is not connected yet. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then enable Google in Supabase Auth.",
+        "Supabase is not connected yet. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, then enable Google in Supabase Auth.",
       );
       return;
     }

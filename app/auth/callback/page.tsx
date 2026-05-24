@@ -21,8 +21,19 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      const { data, error } = await supabase.auth.getSession();
-      const user = data.session?.user;
+      const code = new URLSearchParams(window.location.search).get("code");
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (error) {
+          setMessage("Could not complete sign in. Please try again.");
+          return;
+        }
+      }
+
+      const { data, error } = await supabase.auth.getUser();
+      const user = data.user;
 
       if (error || !user) {
         setMessage("Could not complete sign in. Please try again.");
