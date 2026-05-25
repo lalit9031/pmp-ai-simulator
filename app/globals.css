@@ -2005,6 +2005,40 @@ body {
   padding: 40px 0;
 }
 
+/* Admin tabs */
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--surface-border);
+  padding-bottom: 0;
+}
+
+.admin-tab {
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  color: var(--muted-text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 18px;
+  margin-bottom: -1px;
+  transition: all 160ms ease;
+}
+
+.admin-tab:hover {
+  color: var(--page-text);
+  background: var(--subtle-bg);
+}
+
+.admin-tab-active {
+  border-color: var(--surface-border) !important;
+  background: var(--surface-bg) !important;
+  color: var(--page-text) !important;
+}
+
 [data-theme="dark"] .admin-badge-founder {
   background: #14532d;
   color: #86efac;

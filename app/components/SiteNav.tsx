@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { FaSignOutAlt, FaUser, FaBars, FaTimes, FaMoon, FaSun } from "react-icons/fa";
 import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { useTheme } from "../lib/ThemeProvider";
+import { isAdminEmail } from "../lib/admin";
 
 const userStorageKey = "pmp-simulator-user-v1";
 
@@ -53,6 +54,7 @@ export default function SiteNav() {
     router.push("/");
   };
 
+  const isAdmin = isAdminEmail(user?.email);
   const displayName = user?.name || user?.email?.split("@")[0] || null;
 
   // Generate initials for avatar
@@ -91,12 +93,13 @@ export default function SiteNav() {
 
       {/* Desktop nav links */}
       <div className="intro-nav-links site-desktop-links">
+        <Link href="/">Home</Link>
         <Link href="/exam">Exam</Link>
         <Link href="/results">Results</Link>
         <Link href="/learn">Learn</Link>
         <Link href="/pricing">Pricing</Link>
         <Link href="/dashboard">Dashboard</Link>
-        <Link href="/admin">Admin</Link>
+        {isAdmin && <Link href="/admin">Admin</Link>}
         <button
           type="button"
           onClick={toggleTheme}
@@ -166,6 +169,9 @@ export default function SiteNav() {
             </button>
           </div>
           <div className="site-mobile-divider" />
+          <Link href="/" className="site-mobile-link" onClick={closeMenu}>
+            Home
+          </Link>
           <Link href="/exam" className="site-mobile-link" onClick={closeMenu}>
             Exam
           </Link>
@@ -181,9 +187,11 @@ export default function SiteNav() {
           <Link href="/dashboard" className="site-mobile-link" onClick={closeMenu}>
             Dashboard
           </Link>
-          <Link href="/admin" className="site-mobile-link" onClick={closeMenu}>
-            Admin
-          </Link>
+          {isAdmin && (
+            <Link href="/admin" className="site-mobile-link" onClick={closeMenu}>
+              Admin
+            </Link>
+          )}
           <div className="site-mobile-divider" />
           {displayName ? (
             <div className="site-mobile-user-section">

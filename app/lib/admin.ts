@@ -6,7 +6,7 @@
  * (which takes precedence if present).
  */
 
-const HARDCODED_ADMIN_EMAIL = "admin@pmp.com";
+const HARDCODED_ADMIN_EMAIL = "wildhogs99@gmail.com";
 
 export function getAdminEmail(): string {
   return (
