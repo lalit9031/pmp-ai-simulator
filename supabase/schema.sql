@@ -51,6 +51,16 @@ create table if not exists public.weak_area_stats (
   unique (user_id, topic, difficulty)
 );
 
+-- Tracks paid signups for the first-100 user counter across all visitors.
+-- The service_role key inserts and counts rows via API routes.
+create table if not exists public.paid_signups (
+  id bigint primary key generated always as identity,
+  user_id uuid references auth.users(id) on delete set null,
+  email text,
+  plan text not null,
+  created_at timestamptz not null default now()
+);
+
 alter table public.profiles enable row level security;
 alter table public.exams enable row level security;
 alter table public.answers enable row level security;

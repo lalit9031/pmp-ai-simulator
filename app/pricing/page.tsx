@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FaCheck, FaLockOpen } from "react-icons/fa";
 import { getPricingInfo, isIndia } from "../lib/pricing";
+import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 
 const planStorageKey = "pmp-simulator-plan-v1";
 const paidUsersStorageKey = "pmp-simulator-paid-users-v1";
@@ -27,32 +28,82 @@ export default function PricingPage() {
   const [paidUsers, setPaidUsers] = useState(0);
   const [activePlan, setActivePlan] = useState<string | null>(null);
   const [userInIndia, setUserInIndia] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  const fetchServerCount = useCallback(async () => {
+    try {
+      const response = await fetch("/api/signup-count");
+      const data = await response.json();
+
+      if (data.source === "database" && typeof data.count === "number") {
+        setPaidUsers(data.count);
+        // Sync to localStorage for offline/fallback use
+        window.localStorage.setItem(
+          paidUsersStorageKey,
+          String(data.count),
+        );
+      }
+    } catch {
+      // Fall back to localStorage if the API call fails
+      const localCount = Number(
+        window.localStorage.getItem(paidUsersStorageKey) ?? 0,
+      );
+      setPaidUsers(localCount);
+    }
+  }, []);
 
   useEffect(() => {
     const loadHandle = window.setTimeout(() => {
-      setPaidUsers(
-        Number(window.localStorage.getItem(paidUsersStorageKey) ?? 0),
+      // Read localStorage first for instant display, then update from server
+      const localCount = Number(
+        window.localStorage.getItem(paidUsersStorageKey) ?? 0,
       );
+      setPaidUsers(localCount);
       setActivePlan(window.localStorage.getItem(planStorageKey));
       setUserInIndia(isIndia());
+      setLoading(false);
+      // Fetch server count asynchronously (will update when ready)
+      void fetchServerCount();
     }, 0);
 
     return () => window.clearTimeout(loadHandle);
-  }, []);
+  }, [fetchServerCount]);
 
   const founderAvailable = paidUsers < 100;
   const pricing = getPricingInfo(founderAvailable, userInIndia);
   const currentPlan = founderAvailable ? "founder" : "annual";
 
-  const handleCheckout = (plan: string) => {
+  const handleCheckout = async (plan: string) => {
     window.localStorage.setItem(planStorageKey, plan);
 
     if (plan !== "global") {
+      // Optimistically update local state
+      const updatedCount = Math.min(100, paidUsers + 1);
+      setPaidUsers(updatedCount);
       window.localStorage.setItem(
         paidUsersStorageKey,
-        String(Math.min(100, paidUsers + 1)),
+        String(updatedCount),
       );
-      setPaidUsers((value) => Math.min(100, value + 1));
+
+      // Submit purchase to server
+      const supabase = getSupabaseBrowserClient();
+      let userId: string | null = null;
+      let email: string | null = null;
+
+      if (supabase) {
+        const { data } = await supabase.auth.getUser();
+        userId = data?.user?.id ?? null;
+        email = data?.user?.email ?? null;
+      }
+
+      // Fire-and-forget: don't block navigation on the server call
+      fetch("/api/submit-purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, userId, email }),
+      }).catch(() => {
+        /* non-blocking */
+      });
     }
 
     setActivePlan(plan);
@@ -60,10 +111,23 @@ export default function PricingPage() {
     router.push("/exam?plan=live&fresh=1");
   };
 
-  const locationLabel = userInIndia ? "India" : "outside India";
-  const locationPricePhrase = userInIndia
-    ? `${pricing.label}`
-    : `${pricing.label}`;
+  if (loading) {
+    return (
+      <main className="pricing-page">
+        <section className="pricing-shell">
+          <div className="pricing-nav">
+            <Link href="/learn" className="learn-back-link">
+              &larr; Learning Hub
+            </Link>
+          </div>
+          <div className="pricing-header">
+            <p className="intro-eyebrow">Paid Plan</p>
+            <h1>Loading pricing...</h1>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="pricing-page">
@@ -108,7 +172,9 @@ export default function PricingPage() {
             </span>
             <h2>Live PMP Practice</h2>
             <div className="pricing-price">
-              {userInIndia ? `Rs. ${pricing.price}` : `$${pricing.price.toFixed(2)}`}
+              {userInIndia
+                ? `Rs. ${pricing.price}`
+                : `$${pricing.price.toFixed(2)}`}
             </div>
             <p>
               {founderAvailable
@@ -126,7 +192,9 @@ export default function PricingPage() {
               className="intro-primary-action pricing-button"
             >
               <FaLockOpen aria-hidden="true" />
-              {isPaidPlan(activePlan) ? "Plan active" : `Pay ${pricing.label} & unlock`}
+              {isPaidPlan(activePlan)
+                ? "Plan active"
+                : `Pay ${pricing.label} & unlock`}
             </button>
 
             {userInIndia && (
