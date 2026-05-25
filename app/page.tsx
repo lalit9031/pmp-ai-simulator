@@ -9,37 +9,12 @@ import {
   FaClock,
   FaRegFileAlt,
 } from "react-icons/fa";
-
-const routeCards = [
-  {
-    title: "PMP Simulator",
-    href: "/exam",
-    status: "Ready",
-    description: "Start a timed 185-question PMP-style exam session.",
-    icon: FaRegFileAlt,
-  },
-  {
-    title: "Final Results",
-    href: "/results",
-    status: "Ready",
-    description: "Review score, domain performance, and answer history.",
-    icon: FaClock,
-  },
-  {
-    title: "Learning Hub",
-    href: "/learn",
-    status: "Ready",
-    description: "Study targeted PMP topics after missed questions.",
-    icon: FaBookOpen,
-  },
-  {
-    title: "Analytics",
-    href: "/dashboard",
-    status: "Later",
-    description: "Track readiness trends and focus areas over time.",
-    icon: FaChartLine,
-  },
-];
+import {
+  certifications,
+  getExamCertifications,
+  getLearningCertifications,
+  type CertSlug,
+} from "./certifications";
 
 const userStorageKey = "pmp-simulator-user-v1";
 const planStorageKey = "pmp-simulator-plan-v1";
@@ -56,34 +31,36 @@ export default function IntroPage() {
     const loadHandle = window.setTimeout(() => {
       const user = window.localStorage.getItem(userStorageKey);
       const plan = window.localStorage.getItem(planStorageKey);
-
       setIsSignedIn(Boolean(user));
       setHasPaidPlan(isPaidPlan(plan));
     }, 0);
-
     return () => window.clearTimeout(loadHandle);
   }, []);
 
+  const examCerts = getExamCertifications();
+  const learningCerts = getLearningCertifications();
+  const allCerts = [...examCerts, ...learningCerts];
+
   const startExamHref = isSignedIn
     ? hasPaidPlan
-      ? "/exam?plan=live&fresh=1"
-      : "/exam?plan=free&fresh=1"
-    : "/login?next=%2Fexam%3Fplan%3Dfree%26fresh%3D1";
+      ? "/exam?cert=pmp&plan=live&fresh=1"
+      : "/exam?cert=pmp&plan=free&fresh=1"
+    : "/login?next=%2Fexam%3Fcert%3Dpmp%26plan%3Dfree%26fresh%3D1";
 
   return (
     <main className="intro-page">
       <section className="intro-hero">
         <div className="intro-copy">
-          <p className="intro-eyebrow">PMI-style practice environment</p>
-          <h1>PMP Simulator</h1>
+          <p className="intro-eyebrow">Multi-Certification Practice Environment</p>
+          <h1>Exam Simulator</h1>
           <p className="intro-lede">
-            Sign in to start the free PMP plan with four learning topics,
-            saved progress, results analytics, and upgrade when you are ready
-            for the live full-version simulator.
+            Prepare for PMP, PMI-ACP, CAPM, CSM, PSM I, or study Six Sigma.
+            Practice with AI-powered questions, track your progress, and upgrade
+            when you are ready for the full version.
           </p>
           <div className="intro-actions">
             <Link href={startExamHref} className="intro-primary-action">
-              Start Exam
+              Start PMP Exam
               <FaArrowRight aria-hidden="true" />
             </Link>
             <Link href="/pricing" className="intro-secondary-action">
@@ -92,83 +69,125 @@ export default function IntroPage() {
           </div>
         </div>
 
-        <div className="intro-panel" aria-label="Exam setup preview">
+        <div className="intro-panel" aria-label="Available certifications preview">
           <div className="intro-panel-header">
-            <span>Exam Session</span>
-            <strong>240:00</strong>
+            <span>Available Certs</span>
+            <strong>{allCerts.length}</strong>
           </div>
-          <div className="intro-progress-grid" aria-hidden="true">
-            {Array.from({ length: 36 }, (_, index) => (
-              <span
-                key={index}
-                className={index < 6 ? "intro-progress-active" : ""}
-              />
+          <div className="intro-cert-preview-grid">
+            {allCerts.map((cert) => (
+              <Link
+                key={cert.slug}
+                href={`/exam?cert=${cert.slug}&plan=free&fresh=1`}
+                className="intro-cert-badge"
+                style={{ borderLeftColor: cert.color }}
+                title={cert.title}
+              >
+                <span>{cert.icon}</span>
+                <strong>{cert.shortName}</strong>
+              </Link>
             ))}
           </div>
           <div className="intro-panel-footer">
-            <span>185 questions</span>
-            <span>AI, ESG, value focus</span>
+            <span>{examCerts.length} exam certifications</span>
+            <span>{learningCerts.length} learning-only</span>
           </div>
         </div>
       </section>
 
-      <section className="intro-offer" aria-label="Practice plans">
-        <div>
-          <span>Free practice</span>
-          <strong>4 core topics included</strong>
+      {/* Certification cards */}
+      <section className="intro-certs" aria-label="Certifications">
+        <div className="intro-certs-header">
+          <p className="intro-eyebrow">Certifications</p>
+          <h2>Choose your certification path</h2>
           <p>
-            Signed-in learners can read, test, and practice Agile, Risk,
-            Stakeholder, and Hybrid topics with saved browser progress.
+            Each certification includes domain-specific questions, timed exam
+            simulations, and personalized learning recommendations.
           </p>
         </div>
-        <div>
-          <span>Paid live test</span>
-          <strong>AI PMP questions</strong>
-          <p>
-            Subscribe to unlock the live simulator, all PMP topics, AI,
-            sustainability, ESG, business value, and full-version practice.
-          </p>
-        </div>
-        <div>
-          <span>Founder price</span>
-          <strong>India ₹199 · Global $2.49</strong>
-          <p>
-            First 100 users get founder pricing. In India: ₹199, outside India:
-            $2.49. After the first 100, pricing moves to ₹399 / $3.99.
-          </p>
+
+        <div className="intro-certs-grid">
+          {allCerts.map((cert) => (
+            <Link
+              key={cert.slug}
+              href={`/exam?cert=${cert.slug}&plan=free&fresh=1`}
+              className="intro-cert-card"
+              style={{ borderTopColor: cert.color }}
+            >
+              <div className="intro-cert-card-top">
+                <span className="intro-cert-card-icon">{cert.icon}</span>
+                <span className={`intro-cert-card-type ${cert.type === "learning" ? "intro-cert-type-learning" : ""}`}>
+                  {cert.type === "exam" ? "Exam" : "Learning"}
+                </span>
+              </div>
+              <h3>{cert.title}</h3>
+              <p>{cert.description}</p>
+              <div className="intro-cert-card-meta">
+                {cert.type === "exam" && (
+                  <>
+                    <span>{cert.totalQuestions} questions</span>
+                    <span>{cert.timeLimitMinutes} min</span>
+                  </>
+                )}
+              </div>
+              <div className="intro-cert-card-action">
+                <span>
+                  {cert.type === "exam" ? "Start Practice" : "Start Learning"}
+                </span>
+                <FaArrowRight aria-hidden="true" />
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
       <section className="intro-routes" aria-label="Application routes">
-        {routeCards.map((card) => {
-          const Icon = card.icon;
-
-          return (
-            <Link key={card.href} href={card.href} className="intro-route-card">
-              <div className="intro-route-icon">
-                <Icon aria-hidden="true" />
-              </div>
-              <div>
-                <div className="intro-route-heading">
-                  <h2>{card.title}</h2>
-                  <span>{card.status}</span>
-                </div>
-                <p>{card.description}</p>
-              </div>
-            </Link>
-          );
-        })}
+        <Link href="/results" className="intro-route-card">
+          <div className="intro-route-icon">
+            <FaClock aria-hidden="true" />
+          </div>
+          <div>
+            <div className="intro-route-heading">
+              <h2>Results</h2>
+              <span>Ready</span>
+            </div>
+            <p>Review score, domain performance, and answer history.</p>
+          </div>
+        </Link>
+        <Link href="/learn" className="intro-route-card">
+          <div className="intro-route-icon">
+            <FaBookOpen aria-hidden="true" />
+          </div>
+          <div>
+            <div className="intro-route-heading">
+              <h2>Learning Hub</h2>
+              <span>Ready</span>
+            </div>
+            <p>Study targeted topics after missed questions.</p>
+          </div>
+        </Link>
+        <Link href="/dashboard" className="intro-route-card">
+          <div className="intro-route-icon">
+            <FaChartLine aria-hidden="true" />
+          </div>
+          <div>
+            <div className="intro-route-heading">
+              <h2>Analytics</h2>
+              <span>Later</span>
+            </div>
+            <p>Track readiness trends and focus areas over time.</p>
+          </div>
+        </Link>
       </section>
 
-      {/* Paid benefits section — only shown to signed-in free users */}
       {isSignedIn && !hasPaidPlan && (
         <section className="intro-benefits" aria-label="Paid plan benefits">
           <div className="intro-benefits-header">
             <p className="intro-eyebrow">Unlock Full Access</p>
             <h2>Why go paid?</h2>
             <p>
-              Get the complete PMP exam experience with AI-powered questions,
-              unlimited topics, and detailed analytics.
+              Get the complete exam experience with AI-powered questions,
+              all certifications, unlimited topics, and detailed analytics.
             </p>
           </div>
           <div className="intro-benefits-grid">
@@ -176,32 +195,32 @@ export default function IntroPage() {
               <span className="intro-benefit-icon">🤖</span>
               <h3>AI-Powered Questions</h3>
               <p>
-                Unlimited AI-generated PMP questions covering all domains,
-                updated with latest PMI trends including ESG and business value.
+                Unlimited AI-generated questions covering all certifications,
+                updated with latest trends including ESG and business value.
               </p>
             </div>
             <div className="intro-benefit-card">
               <span className="intro-benefit-icon">📚</span>
-              <h3>All Topics Unlocked</h3>
+              <h3>All Certifications</h3>
               <p>
-                Full access to every PMP knowledge area, not just 4 core
-                topics. Learn Agile, Risk, Stakeholder, and beyond.
+                Full access to PMP, PMI-ACP, CAPM, CSM, PSM I, and Six Sigma.
+                Not just 4 topics — unlock everything.
               </p>
             </div>
             <div className="intro-benefit-card">
               <span className="intro-benefit-icon">📊</span>
               <h3>Advanced Analytics</h3>
               <p>
-                Track domain-wise performance, identify weak areas, and get
-                personalized learning recommendations.
+                Track certification-wise performance, identify weak areas, and
+                get personalized learning recommendations.
               </p>
             </div>
             <div className="intro-benefit-card">
               <span className="intro-benefit-icon">🏆</span>
               <h3>Live Exam Simulator</h3>
               <p>
-                Full 185-question timed exam with real PMP-style questions,
-                just like the actual PMI certification test.
+                Timed exam simulations for each certification with real-style
+                questions, just like the actual certification tests.
               </p>
             </div>
           </div>
@@ -209,7 +228,7 @@ export default function IntroPage() {
             <Link href="/pricing" className="intro-primary-action">
               View Plans &amp; Pricing
             </Link>
-            <Link href="/exam?plan=free&fresh=1" className="intro-secondary-action">
+            <Link href="/exam?cert=pmp&plan=free&fresh=1" className="intro-secondary-action">
               Continue Free
             </Link>
           </div>

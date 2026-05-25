@@ -1,24 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { FaCheck, FaLockOpen } from "react-icons/fa";
 import { getPricingInfo, isIndia } from "../lib/pricing";
 import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { isAdminEmail } from "../lib/admin";
+import { certifications, getCertification, type CertSlug } from "../certifications";
 
 const planStorageKey = "pmp-simulator-plan-v1";
 const paidUsersStorageKey = "pmp-simulator-paid-users-v1";
 const userStorageKey = "pmp-simulator-user-v1";
 
 const paidFeatures = [
-  "Live PMP practice test with fresh AI project management questions",
-  "185-question, 240-minute exam format",
-  "All PMP learning topics beyond the four free core topics",
-  "Ethical AI, AI-assisted decision making, ESG, and sustainability topics",
-  "Business value, strategy alignment, and benefits realization coverage",
-  "New learning topics added as the PMP exam changes",
+  "Live AI-powered practice tests across 5 certifications",
+  "Timed exam simulations with real certification formats",
+  "All learning topics beyond free core topics",
+  "Six Sigma Green/Black Belt learning modules",
+  "Personalized weak-area tracking and recommendations",
+  "New topics added as certification exams change",
 ];
 
 function isPaidPlan(plan: string | null) {
@@ -27,6 +28,9 @@ function isPaidPlan(plan: string | null) {
 
 export default function PricingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const certParam = searchParams.get("cert") as CertSlug | null;
+
   const [paidUsers, setPaidUsers] = useState(0);
   const [activePlan, setActivePlan] = useState<string | null>(null);
   const [userInIndia, setUserInIndia] = useState(true);
@@ -37,36 +41,24 @@ export default function PricingPage() {
     try {
       const response = await fetch("/api/signup-count");
       const data = await response.json();
-
       if (data.source === "database" && typeof data.count === "number") {
         setPaidUsers(data.count);
-        // Sync to localStorage for offline/fallback use
-        window.localStorage.setItem(
-          paidUsersStorageKey,
-          String(data.count),
-        );
+        window.localStorage.setItem(paidUsersStorageKey, String(data.count));
       }
     } catch {
-      // Fall back to localStorage if the API call fails
-      const localCount = Number(
-        window.localStorage.getItem(paidUsersStorageKey) ?? 0,
-      );
+      const localCount = Number(window.localStorage.getItem(paidUsersStorageKey) ?? 0);
       setPaidUsers(localCount);
     }
   }, []);
 
   useEffect(() => {
     const loadHandle = window.setTimeout(() => {
-      // Read localStorage first for instant display, then update from server
-      const localCount = Number(
-        window.localStorage.getItem(paidUsersStorageKey) ?? 0,
-      );
+      const localCount = Number(window.localStorage.getItem(paidUsersStorageKey) ?? 0);
       setPaidUsers(localCount);
       setActivePlan(window.localStorage.getItem(planStorageKey));
       setUserInIndia(isIndia());
       setLoading(false);
 
-      // Check if current user is admin
       const raw = window.localStorage.getItem(userStorageKey);
       if (raw) {
         try {
@@ -77,10 +69,8 @@ export default function PricingPage() {
         }
       }
 
-      // Fetch server count asynchronously (will update when ready)
       void fetchServerCount();
     }, 0);
-
     return () => window.clearTimeout(loadHandle);
   }, [fetchServerCount]);
 
@@ -89,23 +79,15 @@ export default function PricingPage() {
   const currentPlan = founderAvailable ? "founder" : "annual";
 
   const handleCheckout = async (plan: string) => {
-    // Admin users: grant access directly, skip payment
     if (isAdmin) {
       window.localStorage.setItem(planStorageKey, plan);
-
-      // Optimistically update local state
       const updatedCount = Math.min(100, paidUsers + 1);
       setPaidUsers(updatedCount);
-      window.localStorage.setItem(
-        paidUsersStorageKey,
-        String(updatedCount),
-      );
+      window.localStorage.setItem(paidUsersStorageKey, String(updatedCount));
 
-      // Submit purchase to server
       const supabase = getSupabaseBrowserClient();
       let userId: string | null = null;
       let email: string | null = null;
-
       if (supabase) {
         const { data } = await supabase.auth.getUser();
         userId = data?.user?.id ?? null;
@@ -116,31 +98,29 @@ export default function PricingPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan, userId, email }),
-      }).catch(() => {
-        /* non-blocking */
-      });
+      }).catch(() => {});
 
       setActivePlan(plan);
-      window.localStorage.removeItem("pmp-simulator-progress-v1");
+      window.localStorage.removeItem("pmp-simulator-pmp-progress-v1");
       router.push("/exam?plan=live&fresh=1");
       return;
     }
 
-    // Non-admin users: redirect to checkout page with payment options
     router.push(`/checkout?plan=${encodeURIComponent(plan)}`);
   };
+
+  // All exam certifications
+  const examCerts = Object.values(certifications).filter((c) => c.type === "exam");
 
   if (loading) {
     return (
       <main className="pricing-page">
         <section className="pricing-shell">
           <div className="pricing-nav">
-            <Link href="/learn" className="learn-back-link">
-              &larr; Learning Hub
-            </Link>
+            <Link href="/learn" className="learn-back-link">&larr; Learning Hub</Link>
           </div>
           <div className="pricing-header">
-            <p className="intro-eyebrow">Paid Plan</p>
+            <p className="intro-eyebrow">Pricing</p>
             <h1>Loading pricing...</h1>
           </div>
         </section>
@@ -152,19 +132,37 @@ export default function PricingPage() {
     <main className="pricing-page">
       <section className="pricing-shell">
         <div className="pricing-nav">
-          <Link href="/learn" className="learn-back-link">
-            &larr; Learning Hub
-          </Link>
+          <Link href="/learn" className="learn-back-link">&larr; Learning Hub</Link>
         </div>
 
         <div className="pricing-header">
-          <p className="intro-eyebrow">Paid Plan</p>
-          <h1>Unlock live PMP practice with AI questions.</h1>
+          <p className="intro-eyebrow">Pricing</p>
+          <h1>Unlock all certifications with AI questions.</h1>
           <p>
-            Free users practice from a fixed 1000-question bank. Paid users get
-            live AI project management questions and expanded learning topics
-            for one year.
+            Free users get core practice across all certifications. Paid users
+            unlock live AI questions, full topic libraries, and timed exam
+            simulations for one year.
           </p>
+        </div>
+
+        {/* Certification badges */}
+        <div className="pricing-cert-badges">
+          {examCerts.map((cert) => (
+            <div key={cert.slug} className="pricing-cert-badge" style={{ borderLeftColor: cert.color }}>
+              <span>{cert.icon}</span>
+              <div>
+                <strong>{cert.shortName}</strong>
+                <span>{cert.totalQuestions} Q · {cert.timeLimitMinutes} min</span>
+              </div>
+            </div>
+          ))}
+          <div className="pricing-cert-badge pricing-cert-badge-learning" style={{ borderLeftColor: "#ca8a04" }}>
+            <span>📊</span>
+            <div>
+              <strong>Six Sigma</strong>
+              <span>Learning only</span>
+            </div>
+          </div>
         </div>
 
         <div className="pricing-grid">
@@ -173,12 +171,11 @@ export default function PricingPage() {
             <h2>Free Practice</h2>
             <div className="pricing-price">Rs. 0</div>
             <p>
-              Sign in and access four core PMP topics: Agile, Risk,
-              Stakeholder, and Hybrid. Read, test, and practice before
-              upgrading.
+              Core topics across all certifications. Practice with fixed
+              question banks and track your progress.
             </p>
             <Link
-              href="/exam?plan=free&fresh=1"
+              href={`/exam?cert=${certParam ?? "pmp"}&plan=free&fresh=1`}
               className="intro-secondary-action"
             >
               Start free practice
@@ -189,11 +186,9 @@ export default function PricingPage() {
             <span className="pricing-kicker">
               {founderAvailable ? "First 100 users" : "Annual access"}
             </span>
-            <h2>Live PMP Practice</h2>
+            <h2>All Certifications</h2>
             <div className="pricing-price">
-              {userInIndia
-                ? `Rs. ${pricing.price}`
-                : `$${pricing.price.toFixed(2)}`}
+              {userInIndia ? `Rs. ${pricing.price}` : `$${pricing.price.toFixed(2)}`}
             </div>
             <p>
               {founderAvailable
@@ -209,7 +204,7 @@ export default function PricingPage() {
               <FaLockOpen aria-hidden="true" />
               {isPaidPlan(activePlan)
                 ? "Plan active"
-                : `Pay ${pricing.label} & unlock`}
+                : `Pay ${pricing.label} & unlock all`}
             </button>
 
             {userInIndia && (
@@ -224,7 +219,6 @@ export default function PricingPage() {
                 </button>
               </p>
             )}
-
             {!userInIndia && (
               <p className="pricing-global-note">
                 In India?{" "}

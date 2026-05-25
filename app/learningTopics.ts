@@ -524,6 +524,362 @@ export const learningTopics: Record<string, LearningTopic> = {
       },
     ],
   },
+  /* ── Six Sigma: DMAIC Overview ── */
+  "dmaic-overview": {
+    slug: "dmaic-overview",
+    title: "DMAIC Methodology Overview",
+    domain: "Six Sigma",
+    summary:
+      "DMAIC (Define, Measure, Analyze, Improve, Control) is the core problem-solving framework of Six Sigma. Each phase has a specific purpose: Define the problem and goals, Measure the current state, Analyze root causes, Improve the process, and Control the gains. Green Belts lead projects; Black Belts mentor and handle complex analysis.",
+    mindset:
+      "Think data-driven and structured. Every decision should be backed by measurement and statistical evidence. Avoid jumping to solutions — define and measure first, then analyze before improving.",
+    coreIdeas: [
+      "Define: charter the project, map the process, identify customer CTQs (Critical to Quality).",
+      "Measure: collect baseline data, validate measurement systems, calculate process sigma.",
+      "Analyze: identify root causes using data analysis, hypothesis testing, and process mapping.",
+      "Improve: generate, select, and implement solutions; pilot before full rollout.",
+      "Control: monitor the improved process, create control plans, sustain the gains.",
+      "DMAIC is iterative — revisit earlier phases if new data surfaces.",
+    ],
+    howToThink: [
+      "Start by clearly defining the problem and scope — a vague problem leads to vague solutions.",
+      "Measure before you change — without baseline data, you cannot prove improvement.",
+      "Analyze root causes, not symptoms — use tools like fishbone diagrams and 5 Whys.",
+      "Improve with evidence — pilot solutions and measure results before full implementation.",
+      "Control is not optional — without controls, processes revert to old patterns.",
+    ],
+    examples: [
+      "A call center has high handle time. Define: reduce handle time by 20%. Measure: current avg = 8 min. Analyze: data shows hold time is the main driver. Improve: implement a knowledge base. Control: weekly handle time reports.",
+      "A manufacturing line has 15% defect rate. Define: reduce defects to 5%. Measure: baseline data collected. Analyze: root cause is temperature variation. Improve: install temperature controllers. Control: SPC charts for temperature.",
+    ],
+    focusAreas: [
+      "Define Phase deliverables (charter, SIPOC, CTQs)",
+      "Measure Phase (baseline data, measurement system analysis)",
+      "Analyze Phase (root cause analysis, hypothesis testing)",
+      "Improve Phase (solution design, piloting, FMEA)",
+      "Control Phase (SPC, control plans, process documentation)",
+    ],
+    commonTraps: [
+      "Skipping the Measure phase and jumping to solutions.",
+      "Defining the problem too broadly to be actionable.",
+      "Implementing improvements without piloting or control plans.",
+      "Using data that has not been validated for accuracy.",
+    ],
+    practicePrompt:
+      "For DMAIC questions, identify which phase the scenario is in and choose the answer that fits the phase's purpose.",
+    practiceSet: [
+      {
+        prompt:
+          "A team is about to start a Six Sigma project to reduce order processing errors. They have a general sense that errors are high but no specific data. What should they do first?",
+        options: [
+          "Brainstorm solutions to reduce errors immediately",
+          "Start the Define phase by chartering the project and identifying CTQs",
+          "Purchase new software to automate order processing",
+          "Train all staff on error reduction techniques",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The Define phase establishes the project scope, goals, and customer requirements before any data collection or solutions.",
+      },
+      {
+        prompt:
+          "After implementing a process improvement, the Six Sigma team wants to ensure the gains are sustained. What should they do?",
+        options: [
+          "Move on to the next project immediately",
+          "Create a control plan with monitoring and response procedures",
+          "Document the old process in case they need to revert",
+          "Reduce sample sizes to save money on inspection",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The Control phase ensures sustained improvement through monitoring, control plans, and clear response procedures.",
+      },
+    ],
+  },
+  "process-mapping": {
+    slug: "process-mapping",
+    title: "Process Mapping & SIPOC",
+    domain: "Six Sigma",
+    summary:
+      "Process maps (flowcharts, value stream maps) and SIPOC (Suppliers, Inputs, Process, Outputs, Customers) are foundational tools in Six Sigma. They help teams visualize the current state, identify waste, and find improvement opportunities before making changes.",
+    mindset:
+      "You cannot improve what you cannot see. A good process map reveals bottlenecks, redundancies, and non-value-added steps. SIPOC provides a high-level view before diving into detailed process analysis.",
+    coreIdeas: [
+      "SIPOC provides a high-level view of a process before detailed mapping.",
+      "Value stream maps show both material and information flow.",
+      "Swimlane diagrams clarify cross-functional handoffs and responsibilities.",
+      "Process maps should reflect the current state, not the ideal state.",
+      "Waste (muda) is identified by analyzing each process step for value.",
+    ],
+    howToThink: [
+      "Start with SIPOC to scope the process boundaries.",
+      "Map the current state as it actually happens, not as it should happen.",
+      "Identify value-added vs. non-value-added steps.",
+      "Look for delays, rework loops, and handoff issues.",
+      "Validate the map with people who do the work daily.",
+    ],
+    examples: [
+      "Before improving an invoice approval process, build a SIPOC to identify suppliers (departments submitting invoices), inputs, the approval process, outputs (approved/rejected invoices), and customers (vendors).",
+      "A swimlane map reveals that approvals bounce between three managers, causing 5-day delays. Simplifying handoffs to two managers reduces cycle time by 40%.",
+    ],
+    focusAreas: [
+      "SIPOC creation and analysis",
+      "Current state vs. future state mapping",
+      "Value-added vs. non-value-added analysis",
+      "Swimlane and cross-functional maps",
+      "Waste identification (TIMWOOD)",
+    ],
+    commonTraps: [
+      "Mapping the ideal process instead of the actual process.",
+      "Creating maps that are too detailed or too high-level.",
+      "Ignoring information and decision flows.",
+      "Not validating the map with process operators.",
+    ],
+    practicePrompt:
+      "When asked to analyze a process, start with SIPOC or a current-state map before suggesting improvements.",
+    practiceSet: [
+      {
+        prompt:
+          "A Six Sigma team needs to understand the high-level boundaries and stakeholders of an order fulfillment process. What tool should they use first?",
+        options: [
+          "A detailed flowchart of every step",
+          "A SIPOC diagram",
+          "A Pareto chart",
+          "A control chart",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "SIPOC provides a high-level view of process boundaries, suppliers, inputs, outputs, and customers before detailed mapping.",
+      },
+      {
+        prompt:
+          "A process map reveals that customer orders go through four separate approval steps, each adding 1-2 days. Most approvals are rubber-stamped. What is the best improvement?",
+        options: [
+          "Add more approvers to ensure quality",
+          "Eliminate unnecessary approval steps and automate routine approvals",
+          "Increase the time allowed for each approval",
+          "Document each approval step in more detail",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Non-value-added approval steps should be eliminated or streamlined. Reducing handoffs and automating routine approvals reduces cycle time.",
+      },
+    ],
+  },
+  "statistical-process-control": {
+    slug: "statistical-process-control",
+    title: "Statistical Process Control (SPC)",
+    domain: "Six Sigma",
+    summary:
+      "Statistical Process Control (SPC) uses control charts to monitor process stability and detect special cause variation. It distinguishes between common cause variation (inherent to the process) and special cause variation (assignable). Green Belts interpret control charts; Black Belts design the sampling and analysis plans.",
+    mindset:
+      "Not all variation is bad — common cause variation is expected. The goal is to detect special causes quickly and take appropriate action without over-adjusting a stable process.",
+    coreIdeas: [
+      "Control charts have upper and lower control limits (UCL/LCL), typically ±3 sigma.",
+      "Points outside control limits indicate special cause variation.",
+      "Runs, trends, and cycles within limits can also indicate instability.",
+      "Common cause variation requires process redesign; special causes need local fixes.",
+      "Capability analysis (Cp, Cpk) measures how well a process meets specifications.",
+    ],
+    howToThink: [
+      "First determine if the process is in statistical control (stable).",
+      "If special causes are present, find and eliminate them before adjusting the process.",
+      "If only common causes exist, the process needs fundamental redesign to improve.",
+      "Do not adjust a stable process — it will only increase variation.",
+      "Use the right type of control chart for the data (X-bar R, p, u, c charts).",
+    ],
+    examples: [
+      "A control chart for call handle time shows three consecutive points above +2 sigma. This is a special cause pattern — investigate what changed in the past week.",
+      "A process has Cp = 0.8, meaning it cannot meet specifications within its current variation. The team must redesign the process (reduce common cause variation) to improve capability.",
+    ],
+    focusAreas: [
+      "Control chart interpretation (rules for special causes)",
+      "Common cause vs. special cause distinction",
+      "Process capability (Cp, Cpk, Pp, Ppk)",
+      "Control chart selection by data type",
+      "Rational subgrouping and sampling",
+    ],
+    commonTraps: [
+      "Adjusting a stable process (tampering), which increases variation.",
+      "Ignoring runs and trends within control limits that signal instability.",
+      "Confusing control limits with specification limits.",
+      "Using the wrong chart type for the data (e.g., using X-bar R for attribute data).",
+    ],
+    practicePrompt:
+      "When interpreting a control chart, look for points outside limits, runs of 7+, and non-random patterns before deciding if a process is stable.",
+    practiceSet: [
+      {
+        prompt:
+          "A control chart shows that all points are within control limits, but the process output is still not meeting customer specifications. What does this indicate?",
+        options: [
+          "The process is not in control",
+          "The process is stable but not capable",
+          "The control limits are set too wide",
+          "The customer specifications are too strict",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "A stable (in-control) process may still be incapable if its natural variation exceeds specification limits. The process needs redesign.",
+      },
+      {
+        prompt:
+          "An operator adjusts a machine every time a measurement is close to the control limit, even though the process is stable. What is the likely result?",
+        options: [
+          "The process will become more capable",
+          "The process variation will increase due to tampering",
+          "The control limits will narrow automatically",
+          "The specs will become easier to meet",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Tampering — adjusting a stable process — increases variation and makes the process less capable, not more.",
+      },
+    ],
+  },
+  "lean-principles": {
+    slug: "lean-principles",
+    title: "Lean Principles & Waste Reduction",
+    domain: "Six Sigma",
+    summary:
+      "Lean focuses on eliminating waste (muda) and maximizing flow by delivering value to the customer with fewer resources. The seven wastes (TIMWOOD: Transport, Inventory, Motion, Waiting, Overprocessing, Overproduction, Defects) are the core focus. Kaizen (continuous improvement) and 5S (workplace organization) are key methods.",
+    mindset:
+      "Every step in a process either adds value or is waste. The goal is to maximize value-added steps and systematically eliminate waste. Start from the customer's perspective.",
+    coreIdeas: [
+      "Value is defined by the customer — anything the customer would not pay for is waste.",
+      "TIMWOOD: Transport, Inventory, Motion, Waiting, Overprocessing, Overproduction, Defects.",
+      "5S: Sort, Set in Order, Shine, Standardize, Sustain.",
+      "Kaizen: small, continuous improvements involving all employees.",
+      "Just-in-Time (JIT): produce only what is needed, when it is needed.",
+      "Kanban: visual signaling system to control production and inventory.",
+    ],
+    howToThink: [
+      "Identify the type of waste in the scenario.",
+      "Ask whether the step adds value from the customer's perspective.",
+      "Use 5S to organize the workplace before making complex changes.",
+      "Implement pull systems (kanban) to reduce overproduction.",
+      "Engage the people who do the work in kaizen improvements.",
+    ],
+    examples: [
+      "A warehouse where workers walk 15 minutes to find parts is Motion waste. Reorganizing by frequency of use reduces walking time.",
+      "A team produces reports that nobody reads — that is Overprocessing waste. Stop producing them.",
+    ],
+    focusAreas: [
+      "Seven wastes (TIMWOOD) identification",
+      "5S methodology",
+      "Kaizen and continuous improvement",
+      "Kanban and pull systems",
+      "JIT and flow optimization",
+      "Value stream mapping for lean",
+    ],
+    commonTraps: [
+      "Confusing Motion (people moving) with Transport (materials moving).",
+      "Implementing lean tools without understanding the underlying waste.",
+      "Treating kaizen as a one-time event instead of a continuous practice.",
+      "Reducing inventory without addressing the causes of high inventory.",
+    ],
+    practicePrompt:
+      "For lean questions, identify which type of waste TIMWOOD applies and choose the countermeasure that addresses that specific waste.",
+    practiceSet: [
+      {
+        prompt:
+          "A hospital pharmacy stores medications in alphabetical order regardless of how often they are used. Pharmacists walk across the room frequently for common drugs. What type of waste is this?",
+        options: [
+          "Transport waste",
+          "Motion waste",
+          "Waiting waste",
+          "Inventory waste",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Motion waste refers to unnecessary movement of people. Reorganizing by frequency of use reduces motion.",
+      },
+      {
+        prompt:
+          "A factory produces 20% more units than customers order each day 'just in case.' The extra units sit in storage for weeks. What waste does this represent?",
+        options: [
+          "Defect waste",
+          "Motion waste",
+          "Overproduction waste",
+          "Waiting waste",
+        ],
+        correctAnswer: 2,
+        explanation:
+          "Overproduction is making more than the customer needs. It is the most serious waste because it hides other wastes and ties up capital.",
+      },
+    ],
+  },
+  "measurement-system-analysis": {
+    slug: "measurement-system-analysis",
+    title: "Measurement System Analysis (MSA)",
+    domain: "Six Sigma",
+    summary:
+      "Measurement System Analysis (MSA) validates that the data used for Six Sigma decisions is reliable. Gage R&R studies (repeatability and reproducibility) assess measurement variation. Without valid measurements, data-driven decisions are meaningless.",
+    mindset:
+      "Before analyzing data, confirm the measurement system is trustworthy. If you cannot measure accurately, you cannot improve.",
+    coreIdeas: [
+      "Accuracy (calibration): measurements match the true value.",
+      "Precision (repeatability): the same operator gets the same result measuring the same part multiple times.",
+      "Reproducibility: different operators get consistent results measuring the same parts.",
+      "Gage R&R: combined repeatability and reproducibility variation.",
+      "Guideline: Gage R&R < 10% is excellent; 10-30% is acceptable; > 30% needs improvement.",
+      "Attribute agreement analysis: used for pass/fail or categorical measurements.",
+    ],
+    howToThink: [
+      "Ask whether the measurement system has been validated before trusting the data.",
+      "If Gage R&R is high, improve the measurement system before collecting more data.",
+      "Calibration ensures accuracy; Gage R&R ensures precision.",
+      "Operator training and clear procedures reduce reproducibility variation.",
+      "Involve operators in designing the measurement study.",
+    ],
+    examples: [
+      "A Gage R&R study shows 35% variation. The team calibrates gages and retrains operators, reducing R&R to 12%. Now the data can be trusted for analysis.",
+      "In a call center, two quality auditors evaluate the same calls and agree only 70% of the time. Attribute agreement analysis reveals inconsistent scoring criteria.",
+    ],
+    focusAreas: [
+      "Gage R&R studies (crossed, nested, expanded)",
+      "Repeatability vs. reproducibility",
+      "Accuracy vs. precision",
+      "Attribute agreement analysis",
+      "Bias, linearity, and stability studies",
+      "Measurement system improvement",
+    ],
+    commonTraps: [
+      "Analyzing data before validating the measurement system.",
+      "Confusing accuracy (calibration) with precision (Gage R&R).",
+      "Using a measurement system with >30% Gage R&R for critical decisions.",
+      "Assuming digital measurements are always accurate without validation.",
+    ],
+    practicePrompt:
+      "Before trusting any data for Six Sigma decisions, confirm the measurement system has been validated with an appropriate MSA study.",
+    practiceSet: [
+      {
+        prompt:
+          "A Six Sigma team collects defect data from visual inspection by three operators. Before analyzing the data, what should they do?",
+        options: [
+          "Start root cause analysis immediately",
+          "Conduct an attribute agreement analysis to validate inspector consistency",
+          "Average the three operators' data to get a single number",
+          "Use only the most experienced inspector's data",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Attribute agreement analysis validates that inspectors consistently classify defects the same way before data can be trusted.",
+      },
+      {
+        prompt:
+          "A Gage R&R study for a critical measurement yields 28% variation. What should the team do?",
+        options: [
+          "Proceed with analysis since 28% is below 30%",
+          "Improve the measurement system and reassess before analysis",
+          "Ignore the Gage R&R result and focus on improvement",
+          "Reduce the number of operators to lower variation",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "28% is at the upper limit of acceptability. Improving the measurement system would provide more reliable data for decision-making.",
+      },
+    ],
+  },
 };
 
 export function getLearningTopicForQuestion(input: {

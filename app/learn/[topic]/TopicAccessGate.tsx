@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { LearningTopic } from "../../learningTopics";
+import { certifications } from "../../certifications";
 
 const planStorageKey = "pmp-simulator-plan-v1";
-const freeTopicSlugs = ["agile", "risk", "stakeholder", "hybrid"];
+
+// Collect free topic slugs from all certifications
+const freeTopicSlugs = Object.values(certifications).flatMap((c) => c.freeTopicSlugs);
 
 function isPaidPlan(plan: string | null) {
   return plan === "founder" || plan === "annual" || plan === "global";
