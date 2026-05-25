@@ -1,8 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { FaShieldAlt } from "react-icons/fa";
 import type { SignupRecord } from "../api/signup-data/route";
+import { isAdminEmail } from "../lib/admin";
+
+const userStorageKey = "pmp-simulator-user-v1";
 
 function planBadgeClass(plan: string): string {
   switch (plan) {
@@ -23,6 +28,26 @@ export default function AdminPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+
+  // Check admin authorization
+  useEffect(() => {
+    const raw = window.localStorage.getItem(userStorageKey);
+    if (!raw) {
+      setAuthorized(false);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw) as { email?: string };
+      if (isAdminEmail(parsed.email)) {
+        setAuthorized(true);
+      } else {
+        setAuthorized(false);
+      }
+    } catch {
+      setAuthorized(false);
+    }
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -49,6 +74,49 @@ export default function AdminPage() {
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
+
+  // Unauthorized state — not logged in as admin
+  if (authorized === false) {
+    return (
+      <main className="coming-page">
+        <section className="coming-shell">
+          <FaShieldAlt
+            style={{
+              fontSize: 48,
+              color: "var(--muted-text)",
+              marginBottom: 16,
+            }}
+            aria-hidden="true"
+          />
+          <p className="intro-eyebrow">Restricted</p>
+          <h1>Admin access only</h1>
+          <p>
+            You must be signed in as an admin user to view this page.
+          </p>
+          <div className="intro-actions">
+            <Link href="/login?next=/admin" className="intro-primary-action">
+              Sign in
+            </Link>
+            <Link href="/dashboard" className="intro-secondary-action">
+              Go to Dashboard
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  // Still checking authorization
+  if (authorized === null) {
+    return (
+      <main className="coming-page">
+        <section className="coming-shell">
+          <div className="exam-spinner" />
+          <p>Checking authorization...</p>
+        </section>
+      </main>
+    );
+  }
 
   const founderCount = signups.filter(
     (s) => s.plan === "founder" || s.plan === "global",

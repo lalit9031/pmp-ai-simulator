@@ -6,9 +6,11 @@ import { useCallback, useEffect, useState } from "react";
 import { FaCheck, FaLockOpen } from "react-icons/fa";
 import { getPricingInfo, isIndia } from "../lib/pricing";
 import { getSupabaseBrowserClient } from "../lib/supabaseClient";
+import { isAdminEmail } from "../lib/admin";
 
 const planStorageKey = "pmp-simulator-plan-v1";
 const paidUsersStorageKey = "pmp-simulator-paid-users-v1";
+const userStorageKey = "pmp-simulator-user-v1";
 
 const paidFeatures = [
   "Live PMP practice test with fresh AI project management questions",
@@ -29,6 +31,7 @@ export default function PricingPage() {
   const [activePlan, setActivePlan] = useState<string | null>(null);
   const [userInIndia, setUserInIndia] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchServerCount = useCallback(async () => {
     try {
@@ -62,6 +65,18 @@ export default function PricingPage() {
       setActivePlan(window.localStorage.getItem(planStorageKey));
       setUserInIndia(isIndia());
       setLoading(false);
+
+      // Check if current user is admin
+      const raw = window.localStorage.getItem(userStorageKey);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as { email?: string };
+          setIsAdmin(isAdminEmail(parsed.email));
+        } catch {
+          /* ignore */
+        }
+      }
+
       // Fetch server count asynchronously (will update when ready)
       void fetchServerCount();
     }, 0);
@@ -74,9 +89,10 @@ export default function PricingPage() {
   const currentPlan = founderAvailable ? "founder" : "annual";
 
   const handleCheckout = async (plan: string) => {
-    window.localStorage.setItem(planStorageKey, plan);
+    // Admin users: grant access directly, skip payment
+    if (isAdmin) {
+      window.localStorage.setItem(planStorageKey, plan);
 
-    if (plan !== "global") {
       // Optimistically update local state
       const updatedCount = Math.min(100, paidUsers + 1);
       setPaidUsers(updatedCount);
@@ -96,7 +112,6 @@ export default function PricingPage() {
         email = data?.user?.email ?? null;
       }
 
-      // Fire-and-forget: don't block navigation on the server call
       fetch("/api/submit-purchase", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,11 +119,15 @@ export default function PricingPage() {
       }).catch(() => {
         /* non-blocking */
       });
+
+      setActivePlan(plan);
+      window.localStorage.removeItem("pmp-simulator-progress-v1");
+      router.push("/exam?plan=live&fresh=1");
+      return;
     }
 
-    setActivePlan(plan);
-    window.localStorage.removeItem("pmp-simulator-progress-v1");
-    router.push("/exam?plan=live&fresh=1");
+    // Non-admin users: redirect to checkout page with payment options
+    router.push(`/checkout?plan=${encodeURIComponent(plan)}`);
   };
 
   if (loading) {
