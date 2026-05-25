@@ -131,10 +131,10 @@ export default function IntroPage() {
         </div>
         <div>
           <span>Founder price</span>
-          <strong>Rs. 199 India · $3 global</strong>
+          <strong>India ₹199 · Global $2.49</strong>
           <p>
-            First 100 India users get Rs. 199 access. Learners outside India
-            can unlock the full version for $3.
+            First 100 users get founder pricing. In India: ₹199, outside India:
+            $2.49. After the first 100, pricing moves to ₹399 / $3.99.
           </p>
         </div>
       </section>

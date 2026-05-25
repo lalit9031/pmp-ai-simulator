@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaCheck, FaLockOpen } from "react-icons/fa";
+import { getPricingInfo, isIndia } from "../lib/pricing";
 
 const planStorageKey = "pmp-simulator-plan-v1";
 const paidUsersStorageKey = "pmp-simulator-paid-users-v1";
@@ -25,6 +26,7 @@ export default function PricingPage() {
   const router = useRouter();
   const [paidUsers, setPaidUsers] = useState(0);
   const [activePlan, setActivePlan] = useState<string | null>(null);
+  const [userInIndia, setUserInIndia] = useState(true);
 
   useEffect(() => {
     const loadHandle = window.setTimeout(() => {
@@ -32,13 +34,14 @@ export default function PricingPage() {
         Number(window.localStorage.getItem(paidUsersStorageKey) ?? 0),
       );
       setActivePlan(window.localStorage.getItem(planStorageKey));
+      setUserInIndia(isIndia());
     }, 0);
 
     return () => window.clearTimeout(loadHandle);
   }, []);
 
   const founderAvailable = paidUsers < 100;
-  const currentPrice = founderAvailable ? 199 : 399;
+  const pricing = getPricingInfo(founderAvailable, userInIndia);
   const currentPlan = founderAvailable ? "founder" : "annual";
 
   const handleCheckout = (plan: string) => {
@@ -56,6 +59,11 @@ export default function PricingPage() {
     window.localStorage.removeItem("pmp-simulator-progress-v1");
     router.push("/exam?plan=live&fresh=1");
   };
+
+  const locationLabel = userInIndia ? "India" : "outside India";
+  const locationPricePhrase = userInIndia
+    ? `${pricing.label}`
+    : `${pricing.label}`;
 
   return (
     <main className="pricing-page">
@@ -99,12 +107,17 @@ export default function PricingPage() {
               {founderAvailable ? "First 100 users" : "Annual access"}
             </span>
             <h2>Live PMP Practice</h2>
-            <div className="pricing-price">Rs. {currentPrice}</div>
+            <div className="pricing-price">
+              {userInIndia ? `Rs. ${pricing.price}` : `$${pricing.price.toFixed(2)}`}
+            </div>
             <p>
               {founderAvailable
-                ? `${100 - paidUsers} founder seats left at Rs. 199.`
-                : "Founder pricing is complete. Annual access is Rs. 399."}
-              {" "}Outside India, full-version access is $3.
+                ? `${100 - paidUsers} founder ${100 - paidUsers === 1 ? "seat" : "seats"} left at ${pricing.label}.`
+                : `Founder pricing is complete. Annual access is ${pricing.label}.`}
+              {" "}
+              {userInIndia
+                ? "Learners outside India pay in USD."
+                : "Learners in India pay in INR."}
             </p>
 
             <button
@@ -113,16 +126,34 @@ export default function PricingPage() {
               className="intro-primary-action pricing-button"
             >
               <FaLockOpen aria-hidden="true" />
-              {isPaidPlan(activePlan) ? "Plan active" : "Pay Rs. and unlock"}
+              {isPaidPlan(activePlan) ? "Plan active" : `Pay ${pricing.label} & unlock`}
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleCheckout("global")}
-              className="intro-secondary-action pricing-button pricing-global-button"
-            >
-              Pay $3 outside India
-            </button>
+            {userInIndia && (
+              <p className="pricing-global-note">
+                Outside India?{" "}
+                <button
+                  type="button"
+                  onClick={() => handleCheckout("global")}
+                  className="pricing-text-link"
+                >
+                  Pay {getPricingInfo(founderAvailable, false).label}
+                </button>
+              </p>
+            )}
+
+            {!userInIndia && (
+              <p className="pricing-global-note">
+                In India?{" "}
+                <button
+                  type="button"
+                  onClick={() => handleCheckout("global")}
+                  className="pricing-text-link"
+                >
+                  Pay {getPricingInfo(founderAvailable, true).label}
+                </button>
+              </p>
+            )}
 
             <ul className="pricing-feature-list">
               {paidFeatures.map((feature) => (
