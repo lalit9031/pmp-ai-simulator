@@ -11,6 +11,7 @@ create table if not exists public.profiles (
 create table if not exists public.exams (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
+  certification text not null default 'pmp',
   mode text,
   domain text,
   difficulty text not null default 'Mixed',
@@ -28,6 +29,7 @@ create table if not exists public.answers (
   id uuid primary key default gen_random_uuid(),
   exam_id uuid not null references public.exams(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
+  certification text not null default 'pmp',
   question text not null,
   selected_answer integer,
   correct_answer integer not null,
@@ -37,6 +39,13 @@ create table if not exists public.answers (
   difficulty text,
   created_at timestamptz not null default now()
 );
+
+-- Keep existing installations compatible with certification-specific history.
+alter table public.exams
+  add column if not exists certification text not null default 'pmp';
+
+alter table public.answers
+  add column if not exists certification text not null default 'pmp';
 
 create table if not exists public.weak_area_stats (
   id uuid primary key default gen_random_uuid(),

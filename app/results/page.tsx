@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 type ResultQuestion = {
   question: string;
@@ -68,7 +68,7 @@ function isPaidPlan(plan: string | null) {
   return plan === "founder" || plan === "annual" || plan === "global";
 }
 
-export default function ResultsPage() {
+function ResultsContent() {
   const searchParams = useSearchParams();
   const certParam = searchParams.get("cert") ?? "pmp";
 
@@ -326,5 +326,22 @@ export default function ResultsPage() {
         </section>
       </section>
     </main>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="coming-page">
+          <section className="coming-shell">
+            <p className="intro-eyebrow">Results</p>
+            <h1>Loading...</h1>
+          </section>
+        </main>
+      }
+    >
+      <ResultsContent />
+    </Suspense>
   );
 }

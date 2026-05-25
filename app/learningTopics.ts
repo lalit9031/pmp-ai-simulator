@@ -524,6 +524,1224 @@ export const learningTopics: Record<string, LearningTopic> = {
       },
     ],
   },
+  /* ── PMI-ACP: Agile Principles ── */
+  "agile-principles": {
+    slug: "agile-principles",
+    title: "Agile Principles & Mindset",
+    domain: "Agile Principles",
+    summary:
+      "The PMI-ACP exam tests deep understanding of the Agile Manifesto, its 12 principles, and the agile mindset. Questions focus on how agile principles translate into team behavior, stakeholder collaboration, and delivery decisions.",
+    mindset:
+      "Think lean and value-driven. Individuals and interactions over processes and tools. Working software over comprehensive documentation. Customer collaboration over contract negotiation. Responding to change over following a plan.",
+    coreIdeas: [
+      "Our highest priority is to satisfy the customer through early and continuous delivery of valuable software.",
+      "Welcome changing requirements, even late in development. Agile processes harness change for competitive advantage.",
+      "Deliver working software frequently, from a couple of weeks to a couple of months, with a preference to the shorter timescale.",
+      "Business people and developers must work together daily throughout the project.",
+      "Build projects around motivated individuals. Give them the environment and support they need, and trust them to get the job done.",
+      "The most efficient and effective method of conveying information is face-to-face conversation.",
+      "Working software is the primary measure of progress.",
+      "Agile processes promote sustainable development. The sponsors, developers, and users should be able to maintain a constant pace indefinitely.",
+      "Continuous attention to technical excellence and good design enhances agility.",
+      "Simplicity — the art of maximizing the amount of work not done — is essential.",
+      "The best architectures, requirements, and designs emerge from self-organizing teams.",
+      "At regular intervals, the team reflects on how to become more effective, then tunes and adjusts its behavior accordingly.",
+    ],
+    howToThink: [
+      "Customer value comes first — always start from what the customer needs.",
+      "Change is welcome, not feared — inspect and adapt.",
+      "Trust the team to self-organize and make technical decisions.",
+      "Face-to-face communication is preferred over written documentation.",
+      "Simplicity is essential — do the minimum needed to deliver value now.",
+    ],
+    examples: [
+      "If a stakeholder wants detailed up-front documentation, explain that agile prefers just enough documentation and focuses on working software.",
+      "If a new requirement emerges mid-iteration, welcome it but evaluate its impact on the current sprint goal.",
+      "If the team is burned out, the principle of sustainable pace should guide the discussion on workload.",
+    ],
+    focusAreas: [
+      "Agile Manifesto values and principles",
+      "Customer collaboration and value delivery",
+      "Self-organizing teams",
+      "Sustainable pace",
+      "Continuous improvement",
+      "Face-to-face communication",
+    ],
+    commonTraps: [
+      "Treating agile as just process ceremonies without the mindset.",
+      "Command-and-control behavior that undermines self-organization.",
+      "Over-documentation as a substitute for face-to-face communication.",
+      "Ignoring technical excellence in favor of speed.",
+    ],
+    practicePrompt:
+      "When an agile principles question appears, look for the answer that values individuals, collaboration, working software, and responding to change over rigid processes.",
+    practiceSet: [
+      {
+        prompt:
+          "A new team member asks why agile prefers face-to-face communication over detailed written specifications. What is the best explanation?",
+        options: [
+          "Face-to-face conversation is the most efficient and effective method of conveying information",
+          "Written specifications are not allowed in agile",
+          "Face-to-face communication is only for co-located teams",
+          "Documentation has no value in agile projects",
+        ],
+        correctAnswer: 0,
+        explanation:
+          "The Agile Manifesto values face-to-face conversation as the most efficient and effective communication method, though documentation is still used when needed.",
+      },
+      {
+        prompt:
+          "A stakeholder says the team should commit to a fixed scope for the next six months. The team is using Scrum. What is the best response?",
+        options: [
+          "Agree to fix the scope to satisfy the stakeholder",
+          "Explain that agile welcomes changing requirements and uses iterative planning",
+          "Create a detailed six-month plan with fixed scope",
+          "Ask the team to work overtime to meet the fixed scope",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Agile embraces change. Fixed long-term scope contradicts the principle of welcoming changing requirements and iterative delivery.",
+      },
+    ],
+  },
+  "value-driven-delivery": {
+    slug: "value-driven-delivery",
+    title: "Value-Driven Delivery",
+    domain: "Value-Driven Delivery",
+    summary:
+      "Value-driven delivery is a core agile principle where the team prioritizes delivering the highest-value features first. Techniques include prioritization frameworks (MoSCoW, Kano, relative weighting), minimum viable product (MVP), and regular value delivery through short iterations.",
+    mindset:
+      "Every feature should be evaluated by the value it delivers to the customer. Deliver the smallest increment that provides value, gather feedback, and iterate. Maximize value delivered per unit of time.",
+    coreIdeas: [
+      "Prioritize backlog items by value, not by effort or dependency order.",
+      "MoSCoW: Must have, Should have, Could have, Won't have.",
+      "Kano Model: basic needs, performance needs, excitement needs.",
+      "MVP delivers enough value to validate assumptions with real users.",
+      "Short iterations enable early value delivery and rapid feedback.",
+      "Re-prioritize at each iteration boundary based on new information.",
+    ],
+    howToThink: [
+      "What delivers the most value to the customer right now?",
+      "Can we deliver a smaller version of this feature now and iterate?",
+      "Use data and feedback to validate assumptions about value.",
+      "Avoid gold-plating — build what is needed, not what is imagined.",
+      "Defer low-value features to later iterations.",
+    ],
+    examples: [
+      "If a team is building a payment system, deliver a single payment method first (MVP) before adding all supported methods.",
+      "When prioritizing features, use MoSCoW to separate essential compliance features (Must have) from nice-to-have UI enhancements (Could have).",
+    ],
+    focusAreas: [
+      "Backlog prioritization (MoSCoW, Kano, relative weighting)",
+      "MVP and minimum marketable features",
+      "Value-based delivery sequencing",
+      "Early and frequent value delivery",
+      "Customer feedback loops",
+    ],
+    commonTraps: [
+      "Prioritizing by effort (easiest first) rather than value.",
+      "Building more than needed before validating.",
+      "Continuing to invest in low-value features after new information emerges.",
+      "Treating all features as Must haves.",
+    ],
+    practicePrompt:
+      "For value-driven delivery questions, the best answer prioritizes customer value, delivers iteratively, and re-prioritizes based on feedback.",
+    practiceSet: [
+      {
+        prompt:
+          "A team has 15 items in the backlog for a two-week sprint. The product owner ranks them by value, but the team can only complete 8 items. What should guide the selection?",
+        options: [
+          "Select the 8 items that the team is most familiar with",
+          "Select the top 8 by value ranking and verify capacity",
+          "Ask stakeholders to decide which items to drop",
+          "Include all 15 items and see how far the team gets",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Value ranking by the product owner, validated against team capacity, determines what goes into the sprint. The highest-value items are selected first.",
+      },
+      {
+        prompt:
+          "A product owner suggests building a comprehensive reporting dashboard with 12 different views before releasing anything. What should the agile coach recommend?",
+        options: [
+          "Build all 12 views as requested to ensure completeness",
+          "Release the most valuable 2-3 views first, gather feedback, and iterate",
+          "Build only one view to reduce cost",
+          "Delay the entire dashboard until the next release",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Value-driven delivery favors releasing the highest-value features early and iterating based on feedback rather than building everything upfront.",
+      },
+    ],
+  },
+  "stakeholder-engagement-acp": {
+    slug: "stakeholder-engagement-acp",
+    title: "Stakeholder Engagement (Agile)",
+    domain: "Stakeholder Engagement",
+    summary:
+      "In agile, stakeholder engagement is continuous and collaborative. The product owner acts as the voice of the customer, but the team directly engages stakeholders through reviews, demos, and ongoing feedback loops. Active stakeholder participation is critical for agile success.",
+    mindset:
+      "Stakeholders are partners, not just information sources. Engage them frequently, make them part of the process, and create transparency through demos and reviews. The product owner bridges stakeholder needs and team execution.",
+    coreIdeas: [
+      "The product owner is the single point of contact for stakeholder priorities.",
+      "Sprint reviews are the primary opportunity for stakeholder feedback.",
+      "Stakeholders should see working software frequently, not just reports.",
+      "Feedback from stakeholders should be transparent and visible to the team.",
+      "Stakeholder engagement is continuous, not event-driven.",
+      "Conflicting stakeholder priorities are resolved by the product owner.",
+    ],
+    howToThink: [
+      "Engage stakeholders early and often — do not wait for late-stage reviews.",
+      "Make feedback easy and natural — demos, prototypes, and walkthroughs.",
+      "When stakeholders disagree, the product owner should make the final call on priority.",
+      "Keep stakeholders informed about what the team is working on and why.",
+      "Use transparency to build trust — show real progress, not projections.",
+    ],
+    examples: [
+      "If a key stakeholder misses the sprint review, the product owner should follow up individually to gather feedback.",
+      "If two stakeholders have conflicting feature requests, the product owner prioritizes based on value and strategy.",
+    ],
+    focusAreas: [
+      "Product owner as stakeholder proxy",
+      "Sprint reviews for feedback",
+      "Continuous stakeholder collaboration",
+      "Transparency and trust-building",
+      "Managing conflicting priorities",
+    ],
+    commonTraps: [
+      "Treating stakeholder engagement as a one-time activity at project start.",
+      "Letting stakeholders direct the team's daily work.",
+      "Hiding problems from stakeholders until they are solved.",
+      "Allowing multiple stakeholders to give conflicting direction without PO mediation.",
+    ],
+    practicePrompt:
+      "For agile stakeholder engagement, the best answer involves continuous collaboration, the product owner as decision-maker, and frequent working software demos.",
+    practiceSet: [
+      {
+        prompt:
+          "A stakeholder emails the development team directly asking them to add a last-minute feature before the upcoming review. What is the best response?",
+        options: [
+          "The team should add the feature immediately to satisfy the stakeholder",
+          "The team should redirect the request to the product owner for prioritization",
+          "The team should ignore the request",
+          "The team should add it and hide it from the product owner",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The product owner is responsible for backlog prioritization. Direct stakeholder requests should be funneled through the PO.",
+      },
+      {
+        prompt:
+          "During a sprint review, stakeholders provide unexpected negative feedback about the direction of the product. What should the team do?",
+        options: [
+          "Defend the work that was done",
+          "Listen, capture the feedback, and discuss how to adapt the backlog with the product owner",
+          "Ignore the feedback because it came too late",
+          "Cancel the current sprint and start over",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Sprint reviews are for gathering feedback. Negative feedback is valuable — it should be captured and used to adapt future work.",
+      },
+    ],
+  },
+  "team-performance": {
+    slug: "team-performance",
+    title: "Team Performance",
+    domain: "Team Performance",
+    summary:
+      "Agile teams are self-organizing, cross-functional, and empowered to make decisions. The agile coach or ScrumMaster facilitates team performance by removing impediments, fostering collaboration, and helping the team continuously improve. Velocity, cycle time, and team satisfaction are key measures.",
+    mindset:
+      "The team owns its process and performance. The facilitator helps the team inspect and adapt, not by prescribing solutions but by creating conditions for high performance. Trust, safety, and empowerment are essential.",
+    coreIdeas: [
+      "Self-organizing teams decide how to do their work.",
+      "Cross-functional teams have all skills needed to deliver value.",
+      "Impediment removal is a key facilitator function.",
+      "Team velocity is a planning tool, not a performance metric.",
+      "Retrospectives drive continuous team improvement.",
+      "Psychological safety enables honest communication and innovation.",
+    ],
+    howToThink: [
+      "When the team faces a problem, ask what is preventing them from performing.",
+      "Remove impediments, don't solve problems for the team.",
+      "Use metrics like cycle time to identify bottlenecks, not to judge individuals.",
+      "Celebrate improvements and learn from failures as a team.",
+      "Protect the team from external disruptions.",
+    ],
+    examples: [
+      "If the team's velocity drops, facilitate a retrospective to identify root causes rather than demanding more output.",
+      "If a team member is struggling, the team self-organizes to help, not the manager reassigning work.",
+    ],
+    focusAreas: [
+      "Self-organizing teams",
+      "Impediment removal",
+      "Cross-functional collaboration",
+      "Velocity and capacity management",
+      "Retrospectives and continuous improvement",
+      "Psychological safety",
+    ],
+    commonTraps: [
+      "Using velocity to compare teams or evaluate individual performance.",
+      "Assigning tasks to team members instead of letting them self-organize.",
+      "Skipping retrospectives when the team is busy.",
+      "External managers overriding the team's process decisions.",
+    ],
+    practicePrompt:
+      "For team performance questions, the best answer empowers the team to self-organize, removes impediments, and fosters continuous improvement through retrospectives.",
+    practiceSet: [
+      {
+        prompt:
+          "A team's velocity has been declining for three consecutive sprints. The product owner is concerned. What should the agile coach do first?",
+        options: [
+          "Report the velocity drop to senior management",
+          "Facilitate a retrospective to help the team identify root causes",
+          "Add more team members to increase capacity",
+          "Reduce the sprint length to improve focus",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Velocity changes should be understood by the team first. A retrospective helps the team inspect what is affecting their performance.",
+      },
+      {
+        prompt:
+          "A team member tells the ScrumMaster they are overwhelmed but does not want to bring it up in the daily standup. What is the best response?",
+        options: [
+          "Tell the team member to work harder",
+          "Respect their privacy and discuss how to address the workload issue together",
+          "Ask the product owner to reduce scope",
+          "Assign some of their tasks to other team members",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The ScrumMaster should support the team member privately, respecting their concern, and collaboratively find a solution without overstepping team self-organization.",
+      },
+    ],
+  },
+  "adaptive-planning": {
+    slug: "adaptive-planning",
+    title: "Adaptive Planning",
+    domain: "Adaptive Planning",
+    summary:
+      "Adaptive planning in agile means planning is continuous and multi-level: product roadmap, release plan, iteration plan, and daily plan. Plans are adjusted based on new information, feedback, and changing priorities. Rolling-wave planning and progressive elaboration are key techniques.",
+    mindset:
+      "Plans are valuable, but planning is even more valuable. Adapt plans as you learn more. Avoid detailed long-term plans that become obsolete quickly. Plan in horizons: near-term is detailed, far-term is high-level.",
+    coreIdeas: [
+      "Planning happens at multiple horizons: strategy, release, iteration, daily.",
+      "Release plans are revisited at each iteration boundary.",
+      "Rolling-wave planning: detail near-term work, estimate future work broadly.",
+      "Velocity and capacity drive realistic planning.",
+      "Plans are adjusted based on actual progress, not wishful thinking.",
+      "The team should participate in estimation and planning.",
+    ],
+    howToThink: [
+      "Plan just enough to move forward — not so much that plans become useless.",
+      "Re-plan when new information changes priorities or understanding.",
+      "Use historical velocity for capacity planning, not arbitrary targets.",
+      "Involve the whole team in estimation and planning sessions.",
+      "Keep the product roadmap visible but adaptable.",
+    ],
+    examples: [
+      "At release planning, the team estimates the next iteration in detail and the next release at a higher level.",
+      "After two sprints, the team realizes their velocity is lower than estimated. They adjust the release plan accordingly.",
+    ],
+    focusAreas: [
+      "Multi-horizon planning (strategy, release, iteration, daily)",
+      "Rolling-wave planning",
+      "Estimation techniques (story points, ideal days, affinity)",
+      "Release plan adjustment based on velocity",
+      "Progressive elaboration",
+    ],
+    commonTraps: [
+      "Creating detailed six-month plans that are immediately outdated.",
+      "Not re-planning when new information emerges.",
+      "Using velocity as a commitment rather than a forecast.",
+      "Planning without team involvement or buy-in.",
+    ],
+    practicePrompt:
+      "For adaptive planning questions, the best answer plans at multiple horizons, adjusts based on data, and involves the whole team.",
+    practiceSet: [
+      {
+        prompt:
+          "A team is starting a new project. The product owner wants a detailed schedule for the next six months. What should the agile coach recommend?",
+        options: [
+          "Create a detailed six-month plan as requested",
+          "Create a high-level release plan with detailed plans for the next iteration only",
+          "Refuse to do any planning until the team has more information",
+          "Create a detailed plan but expect it to change significantly",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Adaptive planning uses rolling-wave: detailed near-term plans and high-level longer-term plans that are refined as more is learned.",
+      },
+      {
+        prompt:
+          "After three sprints, the team's actual velocity is 20% lower than planned. What should happen to the release plan?",
+        options: [
+          "The release plan remains unchanged because it was approved",
+          "The release plan should be revisited and adjusted based on actual velocity",
+          "The team should work overtime to meet the original plan",
+          "Scope should be added to compensate for the velocity",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Adaptive planning uses actual data. Release plans are adjusted at iteration boundaries based on observed velocity.",
+      },
+    ],
+  },
+  /* ── CAPM: Project Fundamentals ── */
+  "project-fundamentals": {
+    slug: "project-fundamentals",
+    title: "Project Fundamentals",
+    domain: "Project Fundamentals",
+    summary:
+      "CAPM tests foundational knowledge of project management concepts: what a project is, the triple constraint (scope, time, cost), project lifecycle, organizational influences, and the role of the project manager. These are the building blocks of all PM processes.",
+    mindset:
+      "Think basics first. A project is a temporary endeavor to create a unique product, service, or result. Operations are ongoing. Every project operates within constraints that must be balanced.",
+    coreIdeas: [
+      "A project is temporary and unique; operations are ongoing and repetitive.",
+      "The triple constraint: scope, schedule, cost. Quality is affected by all three.",
+      "Projects go through phases: starting the project, organizing and preparing, carrying out the work, closing the project.",
+      "Organizational structures (functional, matrix, projectized) affect PM authority.",
+      "The project manager is assigned by the charter and is accountable for project success.",
+      "Enterprise environmental factors and organizational process assets influence how projects are managed.",
+    ],
+    howToThink: [
+      "Distinguish projects (temporary, unique) from operations (ongoing, repetitive).",
+      "Scope, time, and cost are interrelated — changing one affects the others.",
+      "The project lifecycle provides a framework for managing the project.",
+      "Organizational culture and structure affect how the PM operates.",
+      "The project charter authorizes the project and names the PM.",
+    ],
+    examples: [
+      "Developing a new mobile app is a project; processing payroll each month is an operation.",
+      "If the customer adds scope without adjusting time or budget, the PM should request a change request through the integrated change control process.",
+    ],
+    focusAreas: [
+      "Project definition vs. operations",
+      "Triple constraint management",
+      "Project lifecycles and phases",
+      "Organizational influence on projects",
+      "PM role and responsibilities",
+    ],
+    commonTraps: [
+      "Confusing projects with operations.",
+      "Thinking the triple constraint is just scope, time, cost (quality is cross-cutting).",
+      "Assuming all projects follow the same lifecycle.",
+      "Not recognizing the charter as the PM's source of authority.",
+    ],
+    practicePrompt:
+      "For CAPM fundamentals, identify the project characteristics and how organizational factors influence management approach.",
+    practiceSet: [
+      {
+        prompt:
+          "A company hires a project manager to lead the development of a custom software solution. The PM is told the project must be completed within six months with a budget of $500,000. What is this an example of?",
+        options: [
+          "Triple constraint",
+          "Project charter objectives",
+          "Organizational process assets",
+          "Resource management plan",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The objectives of scope (custom software), time (six months), and cost ($500K) are typically defined in the project charter.",
+      },
+      {
+        prompt:
+          "Which of the following best describes a project?",
+        options: [
+          "A repetitive process to manufacture 10,000 units per month",
+          "A temporary endeavor undertaken to create a unique product, service, or result",
+          "An ongoing operational activity to support daily business functions",
+          "A continuous improvement initiative with no defined end date",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "By PMBOK definition, a project is a temporary endeavor with a unique output. Operations are ongoing and repetitive.",
+      },
+    ],
+  },
+  "predictive-methods": {
+    slug: "predictive-methods",
+    title: "Predictive Methods (Waterfall)",
+    domain: "Predictive Methods",
+    summary:
+      "Predictive project management (also called waterfall) follows a sequential lifecycle where each phase completes before the next begins. Key concepts include the Work Breakdown Structure (WBS), critical path method, earned value management (EVM), and progressive elaboration.",
+    mindset:
+      "Plan the work, then work the plan. Detailed planning happens upfront. Changes are managed through formal change control. Focus on baseline management, variance analysis, and corrective actions.",
+    coreIdeas: [
+      "The WBS decomposes scope into manageable work packages.",
+      "The critical path is the longest sequence of activities determining project duration.",
+      "Earned Value Management (EVM) measures cost and schedule performance (CPI, SPI).",
+      "Progressive elaboration means the project plan becomes more detailed over time.",
+      "Change requests go through integrated change control.",
+      "Milestones mark significant events or phase completions.",
+    ],
+    howToThink: [
+      "Start with detailed requirements and a complete project plan.",
+      "Use WBS to ensure all work is identified.",
+      "Identify the critical path to understand schedule risk.",
+      "Track progress using EVM metrics (planned value, earned value, actual cost).",
+      "Manage changes through the defined change control process.",
+    ],
+    examples: [
+      "A construction project follows a predictive lifecycle: design, permitting, site prep, foundation, framing, finishing.",
+      "If a task on the critical path is delayed by one week, the entire project is delayed by one week.",
+    ],
+    focusAreas: [
+      "Work Breakdown Structure (WBS)",
+      "Critical path method and float",
+      "Earned Value Management (EVM)",
+      "Change control process",
+      "Progressive elaboration",
+      "Phase gates and milestones",
+    ],
+    commonTraps: [
+      "Confusing critical path with the shortest path.",
+      "Thinking project float applies to all activities.",
+      "Treating EVM as the only performance indicator.",
+      "Skipping change control for small changes.",
+    ],
+    practicePrompt:
+      "For predictive method questions, look for detailed upfront planning, baseline management, sequential phases, and formal change control.",
+    practiceSet: [
+      {
+        prompt:
+          "A project has three activities on the critical path: A (10 days), B (15 days), and C (5 days). Activity D (8 days) has 5 days of float. If activity B takes 17 days, what happens to the project duration?",
+        options: [
+          "The project duration increases by 2 days",
+          "The project duration is unaffected",
+          "The critical path shifts to activity D",
+          "The project duration increases by 5 days",
+        ],
+        correctAnswer: 0,
+        explanation:
+          "Any delay on the critical path directly extends the project duration. A 2-day delay in B adds 2 days to the total project.",
+      },
+      {
+        prompt:
+          "What is the primary purpose of the Work Breakdown Structure (WBS)?",
+        options: [
+          "To show the project schedule with start and end dates",
+          "To decompose the total project scope into manageable work packages",
+          "To identify project risks and assign owners",
+          "To define the project budget and resource allocation",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The WBS is a deliverable-oriented decomposition of scope that helps ensure all work is identified and organized.",
+      },
+    ],
+  },
+  "agile-methods-capm": {
+    slug: "agile-methods-capm",
+    title: "Agile Methods (CAPM)",
+    domain: "Agile Methods",
+    summary:
+      "The CAPM exam covers agile fundamentals including the Agile Manifesto, Scrum framework, roles, events, and artifacts. Candidates need to understand how agile differs from predictive approaches and when each is appropriate.",
+    mindset:
+      "Understand agile as an adaptive approach for complex projects with high uncertainty. Know the key roles, ceremonies, and artifacts of Scrum, and how agile principles guide decision-making.",
+    coreIdeas: [
+      "Agile is best suited for projects with high uncertainty and changing requirements.",
+      "Scrum roles: Product Owner, ScrumMaster, Development Team.",
+      "Scrum events: Sprint, Sprint Planning, Daily Scrum, Sprint Review, Sprint Retrospective.",
+      "Scrum artifacts: Product Backlog, Sprint Backlog, Increment.",
+      "Agile uses time-boxed iterations (sprints) for value delivery.",
+      "The product owner manages value through backlog prioritization.",
+    ],
+    howToThink: [
+      "Agile is iterative and incremental, not sequential.",
+      "Requirements are refined throughout the project, not fully defined upfront.",
+      "The team self-organizes to determine how to do the work.",
+      "Customer feedback is gathered frequently through demos and reviews.",
+      "Agile works best with co-located, collaborative teams.",
+    ],
+    examples: [
+      "A software startup with evolving requirements would use agile; a bridge construction with fixed specifications would use predictive.",
+      "In Scrum, the team commits to a Sprint Goal and the Sprint Backlog, not a fixed scope.",
+    ],
+    focusAreas: [
+      "When to use agile vs. predictive",
+      "Scrum framework (roles, events, artifacts)",
+      "Agile Manifesto values",
+      "User stories and acceptance criteria",
+      "Backlog refinement",
+    ],
+    commonTraps: [
+      "Thinking agile means no planning.",
+      "Confusing the ScrumMaster role with a project manager.",
+      "Treating the product owner as a project manager.",
+      "Assuming agile can be used for any project type.",
+    ],
+    practicePrompt:
+      "For CAPM agile questions, identify the correct Scrum roles, events, and artifacts, and understand when agile is appropriate.",
+    practiceSet: [
+      {
+        prompt:
+          "In the Scrum framework, who is responsible for managing the Product Backlog?",
+        options: [
+          "The ScrumMaster",
+          "The Development Team",
+          "The Product Owner",
+          "The Project Manager",
+        ],
+        correctAnswer: 2,
+        explanation:
+          "The Product Owner is accountable for Product Backlog management, including prioritization and value optimization.",
+      },
+      {
+        prompt:
+          "A project has well-defined requirements and a fixed budget with regulatory compliance needs. Which development approach is most appropriate?",
+        options: [
+          "Agile (Scrum)",
+          "Predictive (Waterfall)",
+          "Hybrid",
+          "Kanban",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "Predictive approaches work best when requirements are clear, stable, and regulated. Agile is better for high-uncertainty projects.",
+      },
+    ],
+  },
+  "business-analysis-capm": {
+    slug: "business-analysis-capm",
+    title: "Business Analysis (CAPM)",
+    domain: "Business Analysis",
+    summary:
+      "CAPM business analysis covers needs assessment, stakeholder analysis, requirements gathering, traceability, and solution evaluation. The BA role ensures the project delivers the right solution by connecting business needs to project outputs.",
+    mindset:
+      "Understand the business problem before defining requirements. Trace requirements from business need through solution delivery. Involve the right stakeholders to gather complete requirements.",
+    coreIdeas: [
+      "Needs assessment identifies the business problem or opportunity before the project starts.",
+      "Stakeholder analysis identifies who has requirements or is affected by the solution.",
+      "Requirements types: business, stakeholder, solution (functional and non-functional), transition.",
+      "Requirements traceability matrix links requirements to business objectives and test cases.",
+      "Solution evaluation validates that the delivered solution meets business needs.",
+    ],
+    howToThink: [
+      "Start with the business need, not the solution.",
+      "Engage the right stakeholders to gather comprehensive requirements.",
+      "Document and trace requirements to ensure nothing is lost.",
+      "Validate that the solution actually solves the business problem.",
+      "Distinguish between what stakeholders want and what they need.",
+    ],
+    examples: [
+      "Before building a new CRM system, conduct a needs assessment to confirm the current system deficiencies and expected benefits.",
+      "Use a requirements traceability matrix to track each requirement from stakeholder request through design, test, and delivery.",
+    ],
+    focusAreas: [
+      "Needs assessment",
+      "Stakeholder analysis and engagement",
+      "Requirements gathering and documentation",
+      "Requirements traceability matrix",
+      "Solution evaluation and validation",
+    ],
+    commonTraps: [
+      "Jumping to solutions before understanding the business problem.",
+      "Gathering requirements from only one stakeholder group.",
+      "Not tracing requirements through the project lifecycle.",
+      "Assuming the delivered solution will automatically meet business needs without validation.",
+    ],
+    practicePrompt:
+      "For business analysis questions, start with the business need, engage stakeholders, and trace requirements through to validation.",
+    practiceSet: [
+      {
+        prompt:
+          "A project team has been asked to build a new reporting system. Before starting requirements, what should they do first?",
+        options: [
+          "Interview users about what reports they need",
+          "Conduct a needs assessment to understand the business problem",
+          "Design the database schema for the reporting system",
+          "Create a project charter",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "A needs assessment confirms the business problem and whether a project is justified before gathering detailed requirements.",
+      },
+      {
+        prompt:
+          "A requirement states: 'The system shall process 1,000 transactions per second.' What type of requirement is this?",
+        options: [
+          "Business requirement",
+          "Stakeholder requirement",
+          "Non-functional (solution) requirement",
+          "Transition requirement",
+        ],
+        correctAnswer: 2,
+        explanation:
+          "Non-functional requirements describe system performance characteristics (capacity, speed, reliability).",
+      },
+    ],
+  },
+  /* ── CSM: Scrum Theory ── */
+  "scrum-theory": {
+    slug: "scrum-theory",
+    title: "Scrum Theory & Empiricism",
+    domain: "Scrum Theory",
+    summary:
+      "Scrum is founded on empirical process control theory, or empiricism. The three pillars of empiricism are transparency, inspection, and adaptation. Scrum's iterative approach, time-boxed events, and artifacts all support empirical decision-making based on observed reality rather than assumptions.",
+    mindset:
+      "Decisions should be based on what is known, not what is assumed. Make work visible, inspect progress frequently, and adapt the plan based on real data. The ScrumMaster protects the empirical process.",
+    coreIdeas: [
+      "Empiricism asserts that knowledge comes from experience and making decisions based on what is known.",
+      "Transparency: significant aspects of the process must be visible to those responsible for the outcome.",
+      "Inspection: Scrum users must frequently inspect Scrum artifacts and progress toward the Sprint Goal.",
+      "Adaptation: if any aspect of a process deviates outside acceptable limits, the process must be adjusted.",
+      "Scrum's five values: Commitment, Courage, Focus, Openness, Respect.",
+    ],
+    howToThink: [
+      "Make work transparent — hide nothing, especially problems.",
+      "Inspect progress at every Scrum event.",
+      "Adapt the plan based on inspection findings.",
+      "Use Scrum values to guide behavior: be open, courageous, and respectful.",
+      "The ScrumMaster ensures the empirical process is followed.",
+    ],
+    examples: [
+      "If the team's Sprint progress is not transparent, the ScrumMaster should help make it visible through the Sprint Backlog and burndown chart.",
+      "If inspection reveals the team is unlikely to meet the Sprint Goal, adapt by collaborating with the product owner to adjust scope.",
+    ],
+    focusAreas: [
+      "Three pillars of empiricism",
+      "Scrum values",
+      "Empirical decision-making",
+      "Transparency in practice",
+      "When and how to adapt",
+    ],
+    commonTraps: [
+      "Treating Scrum as a prescriptive process rather than an empirical framework.",
+      "Hiding problems to avoid difficult conversations.",
+      "Inspecting without adapting.",
+      "Ignoring Scrum values when making tradeoffs.",
+    ],
+    practicePrompt:
+      "For Scrum theory questions, the best answer relies on empiricism: transparency, inspection, and adaptation, supported by Scrum values.",
+    practiceSet: [
+      {
+        prompt:
+          "A team finishes each Sprint but consistently delivers less value than expected. The ScrumMaster notices the Daily Scrum is used for status reporting, not for inspection and adaptation. What should the ScrumMaster do?",
+        options: [
+          "Let the team run the Daily Scrum as they see fit",
+          "Coach the team on the purpose of the Daily Scrum and its role in empirical process control",
+          "Cancel the Daily Scrum since it is not working",
+          "Ask the product owner to attend and direct the Daily Scrum",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The ScrumMaster coaches the team on Scrum theory and practices. The Daily Scrum is for inspecting progress and adapting the plan.",
+      },
+      {
+        prompt:
+          "During a Sprint Review, stakeholders express surprise at the current state of the product. What Scrum pillar has been violated?",
+        options: [
+          "Adaptation",
+          "Inspection",
+          "Transparency",
+          "Commitment",
+        ],
+        correctAnswer: 2,
+        explanation:
+          "If stakeholders are surprised, the work was not transparent enough. The ScrumMaster should help the team improve transparency, perhaps through more frequent updates or clearer Definition of Done.",
+      },
+    ],
+  },
+  "scrum-events": {
+    slug: "scrum-events",
+    title: "Scrum Events",
+    domain: "Scrum Events",
+    summary:
+      "Scrum defines five events: Sprint, Sprint Planning, Daily Scrum, Sprint Review, and Sprint Retrospective. Each event has a specific purpose, time-box, and participants. Events are opportunities for inspection and adaptation.",
+    mindset:
+      "Events are not meetings — they are formal opportunities to inspect and adapt. Each event has a clear purpose. Skip or shorten events only when their purpose is already met. Time-boxes are maximums, not targets.",
+    coreIdeas: [
+      "The Sprint is a container for all other events. Maximum 1 month.",
+      "Sprint Planning: plan the work for the Sprint (time-box: 8 hours for 1 month).",
+      "Daily Scrum: 15-minute daily plan for the next 24 hours.",
+      "Sprint Review: inspect the Increment and adapt the Product Backlog (time-box: 4 hours for 1 month).",
+      "Sprint Retrospective: plan improvements for the next Sprint (time-box: 3 hours for 1 month).",
+      "All events are time-boxed to the maximum duration, not a target.",
+    ],
+    howToThink: [
+      "The Sprint is a time-box within which a usable Increment is created.",
+      "Sprint Planning answers: Why is this Sprint valuable? What can be done? How will the work be done?",
+      "The Daily Scrum inspects progress toward the Sprint Goal and adapts the Sprint Backlog.",
+      "The Sprint Review includes stakeholders and results in a revised Product Backlog.",
+      "The Sprint Retrospective focuses on people, relationships, process, and tools.",
+    ],
+    examples: [
+      "If the Daily Scrum runs 30 minutes, the ScrumMaster helps the team refocus on planning the next 24 hours.",
+      "If stakeholders want to add new work mid-Sprint, they are asked to bring it to the Sprint Planning or Sprint Review.",
+    ],
+    focusAreas: [
+      "Sprint as a time-boxed iteration",
+      "Sprint Planning (value, scope, plan)",
+      "Daily Scrum (inspection, adaptation)",
+      "Sprint Review (feedback, backlog refinement)",
+      "Sprint Retrospective (improvement)",
+    ],
+    commonTraps: [
+      "Treating the Sprint as a hard deadline rather than a time-box.",
+      "Skipping the Sprint Retrospective.",
+      "Extending the Sprint when work is not complete.",
+      "Adding or changing scope during the Sprint without removing equivalent work.",
+    ],
+    practicePrompt:
+      "For Scrum event questions, know the purpose, time-box, and participants of each event, and distinguish their roles.",
+    practiceSet: [
+      {
+        prompt:
+          "A stakeholder wants to add an urgent feature during the middle of a two-week Sprint. What is the best response?",
+        options: [
+          "Add the feature to the current Sprint and extend the Sprint duration",
+          "Ask the team to add the feature and work overtime",
+          "The product owner may replace lower-priority items with the new feature",
+          "Refuse to accept any changes during the Sprint",
+        ],
+        correctAnswer: 2,
+        explanation:
+          "The product owner can negotiate with the team to swap items in the Sprint Backlog as long as the Sprint Goal remains achievable. The team should not simply add scope.",
+      },
+      {
+        prompt:
+          "During a Sprint Review, the team demonstrates a working Increment. Stakeholders provide significant feedback that would change the direction of the product. What is the best outcome of this event?",
+        options: [
+          "The team incorporates the feedback into the current Sprint",
+          "The Product Backlog is revised based on the feedback",
+          "The Sprint is canceled and restarted",
+          "The feedback is documented for the next project phase",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The Sprint Review results in a revised Product Backlog that reflects the new direction. Feedback is captured and prioritized for future Sprints.",
+      },
+    ],
+  },
+  "scrum-artifacts": {
+    slug: "scrum-artifacts",
+    title: "Scrum Artifacts & Commitments",
+    domain: "Scrum Artifacts",
+    summary:
+      "Scrum artifacts represent work or value: Product Backlog, Sprint Backlog, and Increment. Each artifact has a commitment to ensure transparency: Product Goal, Sprint Goal, and Definition of Done. These commitments help the team and stakeholders understand progress.",
+    mindset:
+      "Artifacts make key information visible. Commitments provide a clear target for each artifact: the Product Goal defines the product vision, the Sprint Goal defines the Sprint objective, and the Definition of Done ensures quality.",
+    coreIdeas: [
+      "Product Backlog: an ordered list of everything needed in the product. Commitment: Product Goal.",
+      "Sprint Backlog: the Product Backlog items selected for the Sprint plus the plan for delivering them. Commitment: Sprint Goal.",
+      "Increment: a usable step toward the Product Goal. Commitment: Definition of Done.",
+      "All artifacts are transparent and updated as more is learned.",
+      "The Product Backlog is never complete — it is an emergent artifact.",
+    ],
+    howToThink: [
+      "The Product Backlog is a living document, ordered by value.",
+      "The Sprint Backlog belongs to the Development Team, not the Product Owner.",
+      "The Increment must meet the Definition of Done to be considered complete.",
+      "The Product Goal provides a long-term vision for the Product Backlog.",
+      "The Sprint Goal provides a single objective for the Sprint.",
+    ],
+    examples: [
+      "If a team does not have a Definition of Done, the ScrumMaster should facilitate the team in creating one.",
+      "If the Product Backlog is unordered, the Product Owner should prioritize it based on value.",
+    ],
+    focusAreas: [
+      "Product Backlog and Product Goal",
+      "Sprint Backlog and Sprint Goal",
+      "Increment and Definition of Done",
+      "Transparency of artifacts",
+      "Emergent vs. fixed requirements",
+    ],
+    commonTraps: [
+      "Letting stakeholders or management change the Sprint Backlog directly.",
+      "Marking work 'Done' without meeting the Definition of Done.",
+      "Treating the Product Backlog as a fixed requirements document.",
+      "Having no Product Goal or Sprint Goal.",
+    ],
+    practicePrompt:
+      "For artifact questions, identify which artifact and commitment applies, and who is responsible for each.",
+    practiceSet: [
+      {
+        prompt:
+          "During a Sprint, a team member completes a task but it does not meet the team's Definition of Done. What should happen?",
+        options: [
+          "The work is still counted as completed for the Sprint",
+          "The work is not considered part of the Increment until it meets the Definition of Done",
+          "The Definition of Done should be lowered to match the actual work",
+          "The product owner decides whether it counts as done",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The Increment must meet the Definition of Done to be potentially releasable. Work that does not meet DoD should not be counted as complete.",
+      },
+      {
+        prompt:
+          "Who is responsible for ordering the Product Backlog?",
+        options: [
+          "The ScrumMaster",
+          "The Development Team",
+          "The Product Owner",
+          "Stakeholders",
+        ],
+        correctAnswer: 2,
+        explanation:
+          "The Product Owner is accountable for Product Backlog management, including ordering items to maximize value.",
+      },
+    ],
+  },
+  "scrum-master-role": {
+    slug: "scrum-master-role",
+    title: "ScrumMaster Role & Responsibilities",
+    domain: "ScrumMaster Role",
+    summary:
+      "The ScrumMaster is a servant leader for the Scrum Team, responsible for promoting and supporting Scrum as defined in the Scrum Guide. The ScrumMaster serves the Product Owner, Development Team, and organization by facilitating Scrum events, removing impediments, and coaching Scrum adoption.",
+    mindset:
+      "Lead by serving. Coach, facilitate, and remove impediments rather than command and control. Protect the team from distractions but let them self-organize. The ScrumMaster is accountable for the Scrum process, not for team output.",
+    coreIdeas: [
+      "The ScrumMaster is a servant leader — not a project manager, team lead, or manager.",
+      "The ScrumMaster coaches the team in self-management and cross-functionality.",
+      "The ScrumMaster causes the removal of impediments (directly or by coaching the team).",
+      "The ScrumMaster facilitates Scrum events and ensures they are effective.",
+      "The ScrumMaster helps the Product Owner with Product Backlog management techniques.",
+      "The ScrumMaster helps the organization adopt Scrum.",
+    ],
+    howToThink: [
+      "Ask: 'How can I help the team be more effective?' rather than 'How can I control the outcome?'",
+      "Coach the team to solve its own problems when possible.",
+      "Protect the team from external disruptions without isolating them.",
+      "Facilitate, do not dictate. The team owns the Sprint Backlog.",
+      "The ScrumMaster's authority comes from servant leadership, not organizational hierarchy.",
+    ],
+    examples: [
+      "If the Product Owner struggles with backlog refinement, the ScrumMaster coaches them on techniques like story mapping or prioritization.",
+      "If management asks the ScrumMaster to assign tasks to team members, the ScrumMaster explains that teams are self-managing.",
+    ],
+    focusAreas: [
+      "Servant leadership",
+      "Coaching the Development Team",
+      "Coaching the Product Owner",
+      "Impediment removal",
+      "Facilitating Scrum events",
+      "Organizational Scrum adoption",
+    ],
+    commonTraps: [
+      "Acting as a project manager (assigning tasks, tracking status, reporting to management).",
+      "Solving all team problems without coaching them to self-resolve.",
+      "Trying to be the 'Scrum police' instead of an enabler.",
+      "Focusing on team output rather than team effectiveness.",
+    ],
+    practicePrompt:
+      "For ScrumMaster questions, the best answer demonstrates servant leadership: coaching, facilitating, removing impediments, and protecting the Scrum process.",
+    practiceSet: [
+      {
+        prompt:
+          "A Development Team member asks the ScrumMaster to assign work to team members because the current self-assignment is leading to conflict. What is the best response?",
+        options: [
+          "Assign work to team members as requested",
+          "Coach the team in self-management techniques and facilitate a discussion about the workflow",
+          "Escalate the issue to management",
+          "Take over the Sprint Backlog management",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The ScrumMaster coaches the team on self-management rather than taking over the assignment process. Facilitating a discussion helps the team resolve the conflict themselves.",
+      },
+      {
+        prompt:
+          "The Product Owner is struggling to maintain a clear Product Backlog. Items are poorly defined and the team is confused about priorities. What should the ScrumMaster do?",
+        options: [
+          "Take over the Product Backlog management",
+          "Coach the Product Owner on backlog refinement techniques and facilitate refinement sessions",
+          "Ask stakeholders to define the backlog",
+          "Let the team define the backlog during Sprint Planning",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The ScrumMaster coaches the Product Owner on techniques like user stories, acceptance criteria, and prioritization. The PO remains accountable for the backlog.",
+      },
+    ],
+  },
+  /* ── PSM I: Scrum Fundamentals (PSM) ── */
+  "scrum-fundamentals": {
+    slug: "scrum-fundamentals",
+    title: "Scrum Fundamentals (PSM)",
+    domain: "Scrum Fundamentals",
+    summary:
+      "PSM I tests deeper understanding of Scrum as defined in the Scrum Guide. Unlike CSM, PSM focuses more on the theory, rules, and accountabilities without adding external practices. Key topics include Scrum roles (accountabilities), events, artifacts, and the rules that bind them.",
+    mindset:
+      "Think strictly from the Scrum Guide. Do not add practices that Scrum does not require. Know the accountabilities, not titles. Understand that Scrum is a framework, not a methodology.",
+    coreIdeas: [
+      "Scrum has three accountabilities: Product Owner, ScrumMaster, and Developers.",
+      "Scrum has five events: Sprint, Sprint Planning, Daily Scrum, Sprint Review, Sprint Retrospective.",
+      "Scrum has three artifacts: Product Backlog, Sprint Backlog, Increment.",
+      "Each artifact has a commitment: Product Goal, Sprint Goal, Definition of Done.",
+      "The Sprint is a container for all other events. No event should be skipped.",
+      "During a Sprint, no changes are made that would endanger the Sprint Goal.",
+    ],
+    howToThink: [
+      "Refer back to the Scrum Guide as the authoritative source.",
+      "Distinguish between accountabilities (Scrum roles) and job titles.",
+      "Understand Scrum's rules: only the PO can cancel a Sprint, only Developers own the Sprint Backlog, etc.",
+      "Know the commitments and how they relate to artifacts.",
+      "Scrum is intentionally incomplete — it only defines what is necessary.",
+    ],
+    examples: [
+      "If someone asks about a 'Scrum Master' (two words), the Scrum Guide uses 'Scrum Master' as one accountability.",
+      "The Sprint Review includes the Product Backlog being adapted; the Sprint Retrospective results in an improvement plan.",
+    ],
+    focusAreas: [
+      "Scrum accountabilities (PO, SM, Developers)",
+      "Scrum events and time-boxes",
+      "Artifacts and commitments",
+      "Sprint rules (no changes endangering Sprint Goal)",
+      "Scrum completeness (intentionally incomplete framework)",
+    ],
+    commonTraps: [
+      "Adding practices that Scrum does not require (estimation techniques, burndown charts are optional).",
+      "Confusing accountabilities with job titles.",
+      "Thinking the ScrumMaster is part of the Development Team.",
+      "Treating the Sprint Backlog as a fixed commitment.",
+    ],
+    practicePrompt:
+      "For PSM I fundamentals, the correct answer follows the Scrum Guide strictly without adding or removing Scrum elements.",
+    practiceSet: [
+      {
+        prompt:
+          "According to the Scrum Guide, who is accountable for ensuring the Scrum Team understands Scrum theory, practices, and rules?",
+        options: [
+          "The Product Owner",
+          "The Scrum Master",
+          "The Developers",
+          "All of the above share equal accountability",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The Scrum Master is accountable for establishing Scrum as defined in the Scrum Guide and for the Scrum Team's effectiveness.",
+      },
+      {
+        prompt:
+          "Which statement about the Sprint is true according to the Scrum Guide?",
+        options: [
+          "A Sprint can be extended if the team has not completed all work",
+          "Sprints are time-boxed to one month or less",
+          "Sprints can be any length the team chooses",
+          "A Sprint must be exactly two weeks",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The Scrum Guide states that Sprints are time-boxed to one month or less. A new Sprint starts immediately after the previous Sprint.",
+      },
+    ],
+  },
+  empiricism: {
+    slug: "empiricism",
+    title: "Empiricism & Evidence-Based Management",
+    domain: "Empiricism",
+    summary:
+      "PSM I emphasizes empiricism more deeply than CSM. Knowledge comes from experience and decisions are based on what is known. Evidence-Based Management (EBM) is an empirical approach to measuring and improving value delivery, organizational capability, and outcomes.",
+    mindset:
+      "Use data and evidence to drive decisions. Make hypotheses, run experiments, measure outcomes, and adapt. Empiricism means trusting what you observe over what you assume.",
+    coreIdeas: [
+      "Empiricism: knowledge comes from experience and making decisions based on what is known.",
+      "Three pillars: transparency, inspection, adaptation.",
+      "Evidence-Based Management (EBM) measures four key value areas: Current Value, Unrealized Value, Ability to Innovate, Time to Market.",
+      "Empirical decisions use data, not intuition or hierarchy.",
+      "Scrum's events are designed for empirical inspection and adaptation.",
+    ],
+    howToThink: [
+      "What data do we have? What is observable?",
+      "Is the work transparent enough to inspect?",
+      "When inspection reveals a deviation, adapt immediately.",
+      "Use EBM metrics to understand value beyond financial measures.",
+      "Experiments (hypothesis-driven development) are consistent with empiricism.",
+    ],
+    examples: [
+      "If the team's ability to innovate is declining (measured by EBM), investigate root causes in the Sprint Retrospective.",
+      "If deployment frequency (Time to Market) is low, the team experiments with automation tools to improve.",
+    ],
+    focusAreas: [
+      "Three pillars of empiricism",
+      "Evidence-Based Management (EBM)",
+      "Transparency in practice",
+      "Hypothesis-driven development",
+      "Using metrics for empirical decisions",
+    ],
+    commonTraps: [
+      "Making decisions based on opinion rather than data.",
+      "Selecting only metrics that confirm existing beliefs (confirmation bias).",
+      "Treating EBM metrics as targets rather than indicators.",
+      "Inspecting without adapting.",
+    ],
+    practicePrompt:
+      "For empiricism questions, the best answer uses data and evidence, makes work transparent, and adapts based on inspection.",
+    practiceSet: [
+      {
+        prompt:
+          "A Scrum Team wants to understand whether they are delivering value efficiently. According to empiricism and EBM, what should they measure?",
+        options: [
+          "Only the budget spent vs. budget planned",
+          "Current Value, Unrealized Value, Ability to Innovate, and Time to Market",
+          "Number of story points completed per Sprint",
+          "Team satisfaction survey results",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "EBM defines four key value areas (KVAs) for empirical measurement: Current Value, Unrealized Value, Ability to Innovate, and Time to Market.",
+      },
+      {
+        prompt:
+          "During a Sprint Review, stakeholders are unhappy with the Increment's direction, despite the team meeting the Sprint Goal. What should the Scrum Master do?",
+        options: [
+          "Defend the team's work against stakeholder criticism",
+          "Ignore stakeholder feedback since the Sprint Goal was met",
+          "Facilitate the inspection and ensure the Product Backlog is adapted based on the new information",
+          "Extend the Sprint to include the stakeholder's feedback",
+        ],
+        correctAnswer: 2,
+        explanation:
+          "Empiricism requires adaptation based on inspection. The Sprint Review is the time for stakeholders to inspect the Increment and for the Product Backlog to be adapted accordingly.",
+      },
+    ],
+  },
+  "scrum-roles-psm": {
+    slug: "scrum-roles-psm",
+    title: "Scrum Accountabilities",
+    domain: "Scrum Roles",
+    summary:
+      "The Scrum Guide defines three accountabilities: Product Owner (maximizes value), Scrum Master (process effectiveness), and Developers (creating the Increment). Unlike CSM, PSM emphasizes these as accountabilities rather than roles, and highlights that they are not job titles but functions within a Scrum Team.",
+    mindset:
+      "Each accountability has clear boundaries. The Product Owner decides what to build and in what order. Developers decide how to build it. The Scrum Master ensures Scrum is understood and enacted.",
+    coreIdeas: [
+      "Product Owner: accountable for maximizing value of the product and managing the Product Backlog.",
+      "Scrum Master: accountable for establishing Scrum and for the Scrum Team's effectiveness.",
+      "Developers: accountable for creating the Increment each Sprint and owning the Sprint Backlog.",
+      "Accountabilities are not job titles; one person may have multiple accountabilities (not recommended).",
+      "No one outside the Development Team can tell Developers how to turn Product Backlog into Increments.",
+    ],
+    howToThink: [
+      "Distinguish between what each accountability owns.",
+      "The PO owns the 'what' and 'why'. The Developers own the 'how'.",
+      "The SM owns the Scrum process, not the team or the product.",
+      "Accountabilities are mutually exclusive — the Developers cannot delegate Sprint Backlog ownership.",
+      "Scrum does not recognize sub-teams within the Development Team.",
+    ],
+    examples: [
+      "If a stakeholder asks Developers to add a feature, they should redirect to the Product Owner.",
+      "If management wants to split the Development Team into testers and coders, the Scrum Master explains there are no sub-teams in Scrum.",
+    ],
+    focusAreas: [
+      "Product Owner accountability",
+      "Scrum Master accountability",
+      "Developers accountability",
+      "Accountability boundaries",
+      "No sub-teams within Developers",
+    ],
+    commonTraps: [
+      "Treating accountabilities as job titles with implied hierarchy.",
+      "Having the Scrum Master also serve as a Developer (technically possible but not recommended).",
+      "Allowing the Product Owner to dictate technical implementation.",
+      "Creating sub-teams (e.g., separate QA team) within the Developers.",
+    ],
+    practicePrompt:
+      "For accountability questions, identify what each accountability owns and respect the boundaries between them.",
+    practiceSet: [
+      {
+        prompt:
+          "The Product Owner wants the Developers to implement a technical solution in a specific way. How should the Developers respond?",
+        options: [
+          "Follow the Product Owner's direction since they control value",
+          "Explain that the Developers decide how to implement the work, while the PO focuses on the what and why",
+          "Escalate to the Scrum Master",
+          "Implement the solution as requested but document their disagreement",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The Developers own the 'how.' The Product Owner decides the 'what' and 'why.' The Scrum Master helps both sides understand these accountabilities.",
+      },
+      {
+        prompt:
+          "A company creates separate 'frontend developers' and 'backend developers' teams within a single Scrum Team. What does the Scrum Guide say?",
+        options: [
+          "This is acceptable if the work is complex",
+          "Scrum does not recognize sub-teams within the Development Team",
+          "The Scrum Master should lead the frontend team",
+          "The Product Owner should be assigned to the backend team",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The Scrum Guide states there are no sub-teams within the Development Team. Cross-functional teams are preferred.",
+      },
+    ],
+  },
+  "scrum-events-artifacts-psm": {
+    slug: "scrum-events-artifacts-psm",
+    title: "Scrum Events & Artifacts (PSM)",
+    domain: "Scrum Events & Artifacts",
+    summary:
+      "PSM I tests detailed knowledge of Scrum events and artifacts as defined in the Scrum Guide. Emphasis on time-boxes, purpose, who must attend, what outputs are expected, and how artifacts relate to their commitments. PSM expects strict adherence to Scrum Guide definitions.",
+    mindset:
+      "Know the exact time-boxes, participants, and purposes from the Scrum Guide. Understand that artifacts are designed for transparency and each has a commitment that ensures stakeholders have a clear understanding.",
+    coreIdeas: [
+      "Sprint Planning time-box: maximum 8 hours for a one-month Sprint. Produces Sprint Goal and Sprint Backlog.",
+      "Daily Scrum: 15-minute daily event for Developers. Inspects progress toward Sprint Goal.",
+      "Sprint Review time-box: maximum 4 hours for one month. Inspects Increment, adapts Product Backlog.",
+      "Sprint Retrospective time-box: maximum 3 hours for one month. Plans improvements for next Sprint.",
+      "Product Backlog is ordered; Sprint Backlog is owned by Developers; Increment must meet Definition of Done.",
+      "Product Goal is the long-term objective for the Product Backlog.",
+    ],
+    howToThink: [
+      "Memorize time-boxes relative to Sprint length.",
+      "Know who must attend each event (e.g., PO and Developers must be at Sprint Review).",
+      "Understand what each event produces (outputs).",
+      "Artifacts must be transparent; if they are not, the process is not working.",
+      "Commitments create accountability and alignment.",
+    ],
+    examples: [
+      "If someone asks who can attend the Daily Scrum, the Scrum Guide says only the Developers are required; others can attend to observe.",
+      "If the Increment does not meet Definition of Done, it cannot be released — even if the Product Owner wants to.",
+    ],
+    focusAreas: [
+      "Sprint Planning time-box and outputs",
+      "Daily Scrum purpose and participants",
+      "Sprint Review time-box and outcomes",
+      "Sprint Retrospective time-box and outcomes",
+      "Artifact commitments (Product Goal, Sprint Goal, DoD)",
+      "Transparency requirements for all artifacts",
+    ],
+    commonTraps: [
+      "Thinking the Daily Scrum is for status reporting to the Scrum Master.",
+      "Confusing Sprint Review (inspect Increment, adapt Backlog) with Sprint Retrospective (improve process).",
+      "Allowing non-Developers to change the Sprint Backlog during the Sprint.",
+      "Releasing an Increment that does not meet the Definition of Done.",
+    ],
+    practicePrompt:
+      "For PSM I events and artifacts, the correct answer applies the Scrum Guide's exact definitions for time-boxes, participants, and outputs.",
+    practiceSet: [
+      {
+        prompt:
+          "A Scrum Team is in the Sprint Review. The Product Owner is absent. According to the Scrum Guide, what should happen?",
+        options: [
+          "Cancel the Sprint Review",
+          "Proceed without the Product Owner and document feedback",
+          "Reschedule the Sprint Review for when the Product Owner is available",
+          "The Scrum Master acts as the Product Owner during the review",
+        ],
+        correctAnswer: 1,
+        explanation:
+          "The Sprint Review is required; it should proceed with the available participants. The PO's absence is a transparency issue to address in the Retrospective.",
+      },
+      {
+        prompt:
+          "What is the maximum time-box for Sprint Retrospective in a one-month Sprint?",
+        options: [
+          "1 hour",
+          "2 hours",
+          "3 hours",
+          "4 hours",
+        ],
+        correctAnswer: 2,
+        explanation:
+          "The Scrum Guide states the Sprint Retrospective is time-boxed to a maximum of 3 hours for a one-month Sprint.",
+      },
+    ],
+  },
   /* ── Six Sigma: DMAIC Overview ── */
   "dmaic-overview": {
     slug: "dmaic-overview",
@@ -886,46 +2104,76 @@ export function getLearningTopicForQuestion(input: {
   question: string;
   domain?: string;
   topic?: string;
-}) {
+  certSlug?: string;
+}): LearningTopic {
   const domain = input.domain?.toLowerCase() ?? "";
   const topic = input.topic?.toLowerCase() ?? "";
   const question = input.question.toLowerCase();
+  const certSlug = input.certSlug ?? "pmp";
   const text = `${domain} ${topic} ${question}`;
 
-  if (text.includes("risk")) {
-    return learningTopics.risk;
+  // ── PMP topics ──
+  if (certSlug === "pmp") {
+    if (text.includes("risk")) return learningTopics.risk;
+    if (text.includes("stakeholder") || text.includes("communication")) return learningTopics.stakeholder;
+    if (text.includes("ai") || text.includes("artificial intelligence")) return learningTopics.ai;
+    if (text.includes("sustainability") || text.includes("sustainable") || text.includes("environmental") || text.includes("social") || text.includes("esg")) return learningTopics.sustainability;
+    if (text.includes("value") || text.includes("benefit") || text.includes("business") || text.includes("strategy")) return learningTopics.value;
+    if (text.includes("hybrid") || text.includes("compliance")) return learningTopics.hybrid;
+    return learningTopics.agile;
   }
 
-  if (text.includes("stakeholder") || text.includes("communication")) {
-    return learningTopics.stakeholder;
+  // ── PMI-ACP topics ──
+  if (certSlug === "pmi-acp") {
+    if (text.includes("stakeholder") || text.includes("communication") || text.includes("engagement")) return learningTopics["stakeholder-engagement-acp"];
+    if (text.includes("value") || text.includes("benefit") || text.includes("moscow") || text.includes("kano")) return learningTopics["value-driven-delivery"];
+    if (text.includes("team") || text.includes("velocity") || text.includes("impediment") || text.includes("retrospective")) return learningTopics["team-performance"];
+    if (text.includes("plan") || text.includes("estimate") || text.includes("horizon") || text.includes("rolling-wave")) return learningTopics["adaptive-planning"];
+    return learningTopics["agile-principles"];
   }
 
-  if (text.includes("ai") || text.includes("artificial intelligence")) {
-    return learningTopics.ai;
+  // ── CAPM topics ──
+  if (certSlug === "capm") {
+    if (text.includes("project") && (text.includes("definition") || text.includes("triple") || text.includes("constraint") || text.includes("charter") || text.includes("lifecycle") || text.includes("organization") || text.includes("operations"))) return learningTopics["project-fundamentals"];
+    if (text.includes("predictive") || text.includes("waterfall") || text.includes("wbs") || text.includes("critical path") || text.includes("earned value") || text.includes("evm")) return learningTopics["predictive-methods"];
+    if (text.includes("scrum") || text.includes("sprint") || text.includes("user story") || text.includes("backlog")) return learningTopics["agile-methods-capm"];
+    if (text.includes("requirement") || text.includes("analysis") || text.includes("traceability") || text.includes("stakeholder need") || text.includes("needs assessment")) return learningTopics["business-analysis-capm"];
+    return learningTopics["project-fundamentals"];
   }
 
-  if (
-    text.includes("sustainability") ||
-    text.includes("sustainable") ||
-    text.includes("environmental") ||
-    text.includes("social") ||
-    text.includes("esg")
-  ) {
-    return learningTopics.sustainability;
+  // ── CSM topics ──
+  if (certSlug === "csm") {
+    if (text.includes("empiricism") || text.includes("transparency") || text.includes("inspection") || text.includes("adaptation") || text.includes("pillar") || text.includes("value")) return learningTopics["scrum-theory"];
+    if (text.includes("sprint planning") || text.includes("daily scrum") || text.includes("sprint review") || text.includes("retrospective") || text.includes("time-box")) return learningTopics["scrum-events"];
+    if (text.includes("backlog") || text.includes("increment") || text.includes("definition of done") || text.includes("product goal") || text.includes("sprint goal") || text.includes("artifact")) return learningTopics["scrum-artifacts"];
+    if (text.includes("scrum master") || text.includes("servant leader") || text.includes("coach") || text.includes("facilitate") || text.includes("impediment")) return learningTopics["scrum-master-role"];
+    return learningTopics["scrum-fundamentals"];
   }
 
-  if (
-    text.includes("value") ||
-    text.includes("benefit") ||
-    text.includes("business") ||
-    text.includes("strategy")
-  ) {
-    return learningTopics.value;
+  // ── PSM I topics ──
+  if (certSlug === "psm-i") {
+    if (text.includes("empiricism") || text.includes("transparency") || text.includes("inspection") || text.includes("adaptation") || text.includes("complexity") || text.includes("ebm") || text.includes("evidence")) return learningTopics.empiricism;
+    if (text.includes("accountability") || text.includes("product owner") || text.includes("developer") || text.includes("role") || text.includes("boundary")) return learningTopics["scrum-roles-psm"];
+    if (text.includes("time-box") || text.includes("sprint") || text.includes("daily scrum") || text.includes("review") || text.includes("retrospective") || text.includes("artifact")) return learningTopics["scrum-events-artifacts-psm"];
+    return learningTopics["scrum-fundamentals"];
   }
 
-  if (text.includes("hybrid") || text.includes("compliance")) {
-    return learningTopics.hybrid;
+  // ── Six Sigma topics ──
+  if (certSlug === "six-sigma") {
+    if (text.includes("define") || text.includes("measure") || text.includes("analyze") || (text.includes("improve") && !text.includes("continuous")) || text.includes("control") || text.includes("dmaic") || text.includes("ctq")) return learningTopics["dmaic-overview"];
+    if (text.includes("sipoc") || text.includes("process map") || text.includes("flowchart") || text.includes("value stream") || text.includes("swimlane") || text.includes("handoff")) return learningTopics["process-mapping"];
+    if (text.includes("control chart") || text.includes("spc") || text.includes("variation") || text.includes("capability") || text.includes("sigma level") || text.includes("defect")) return learningTopics["statistical-process-control"];
+    if (text.includes("lean") || text.includes("waste") || text.includes("muda") || text.includes("kaizen") || text.includes("just-in-time") || text.includes("pull") || text.includes("continuous improvement")) return learningTopics["lean-principles"];
+    if (text.includes("gage") || text.includes("measurement system") || text.includes("calibration") || text.includes("repeatability") || text.includes("reproducibility") || text.includes("attribute agreement")) return learningTopics["measurement-system-analysis"];
+    return learningTopics["dmaic-overview"];
   }
 
+  // ── Fallback: PMP keyword matching for unknown cert slugs ──
+  if (text.includes("risk")) return learningTopics.risk;
+  if (text.includes("stakeholder") || text.includes("communication")) return learningTopics.stakeholder;
+  if (text.includes("ai") || text.includes("artificial intelligence")) return learningTopics.ai;
+  if (text.includes("sustainability") || text.includes("sustainable") || text.includes("environmental") || text.includes("social") || text.includes("esg")) return learningTopics.sustainability;
+  if (text.includes("value") || text.includes("benefit") || text.includes("business") || text.includes("strategy")) return learningTopics.value;
+  if (text.includes("hybrid") || text.includes("compliance")) return learningTopics.hybrid;
   return learningTopics.agile;
 }

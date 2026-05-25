@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { learningTopics } from "../learningTopics";
 import {
-  certifications,
   getCertification,
   getLearningCertifications,
   getExamCertifications,
@@ -19,7 +18,7 @@ function isPaidPlanActive() {
   return plan === "founder" || plan === "annual" || plan === "global";
 }
 
-export default function LearnPage() {
+function LearnContent() {
   const searchParams = useSearchParams();
   const certParam = searchParams.get("cert") as CertSlug | null;
   const [hasPaidPlan, setHasPaidPlan] = useState(false);
@@ -200,5 +199,22 @@ export default function LearnPage() {
         )}
       </section>
     </main>
+  );
+}
+
+export default function LearnPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="learn-page">
+          <section className="learn-shell">
+            <div className="exam-spinner" />
+            <p>Loading topics...</p>
+          </section>
+        </main>
+      }
+    >
+      <LearnContent />
+    </Suspense>
   );
 }

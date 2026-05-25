@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -9,7 +9,7 @@ import {
 } from "../freeQuestionBank";
 import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { getLearningTopicForQuestion, learningTopics } from "../learningTopics";
-import { certifications, getCertification, type CertSlug } from "../certifications";
+import { getCertification, type CertSlug } from "../certifications";
 import { getStarterQuestions } from "../starterQuestions";
 
 type GeneratedQuestion = {
@@ -65,24 +65,15 @@ const planStorageKey = "pmp-simulator-plan-v1";
 const userStorageKey = "pmp-simulator-user-v1";
 const freeTopicQuestionCount = 150;
 
-// Storage key helpers with cert isolation
-function getStorageKey(prefix: string, certSlug: string): string {
-  const cert = getCertification(certSlug);
-  return `pmp-simulator-${cert.storagePrefix}-${prefix}`;
-}
 const progressStorageKey = (s: string) => `pmp-${s}-progress-v1`;
 const resultsStorageKey = (s: string) => `pmp-${s}-latest-results-v1`;
 const mistakeNotebookStorageKey = (s: string) => `pmp-${s}-mistake-notebook-v1`;
 const weakAreaStorageKey = (s: string) => `pmp-${s}-weak-area-stats-v1`;
+const attemptHistoryStorageKey = "pmp-attempt-history-v1";
 
 function getFreeTopicSlugs(certSlug: string): string[] {
   const cert = getCertification(certSlug);
   return cert.freeTopicSlugs;
-}
-
-function getPaidTopicSlugs(certSlug: string): string[] {
-  const cert = getCertification(certSlug);
-  return cert.topicSlugs;
 }
 
 function getTotalQuestions(certSlug: string): number {
@@ -170,8 +161,8 @@ function getMindsetTip(question: GeneratedQuestion) {
   );
 }
 
-function saveMistakeToNotebook(question: ExamQuestion, selectedAnswer: number, certSlug: string) {
-  const topic = getLearningTopicForQuestion(question);
+function saveMistakeToNotebook(question: ExamQuestion, selectedAnswer: number, certSlug: string) {  const topic = getLearningTopicForQuestion({ ...question, certSlug });
+
   const mistake = {
     id: `${question.id}-${Date.now()}`,
     question: cleanUserQuestionText(question.question),
@@ -267,7 +258,7 @@ function saveWeakAreaStats(questions: ExamQuestion[], certSlug: string) {
     const existing = window.localStorage.getItem(weakAreaStorageKey(certSlug));
     const stats = existing ? JSON.parse(existing) : {};
     answered.forEach((question) => {
-      const topic = getLearningTopicForQuestion(question);
+      const topic = getLearningTopicForQuestion({ ...question, certSlug });
       const key = topic.slug;
       stats[key] ??= { domain: topic.domain, topic: topic.title, attempts: 0, correct: 0, mistakes: 0 };
       stats[key].attempts += 1;
@@ -277,6 +268,40 @@ function saveWeakAreaStats(questions: ExamQuestion[], certSlug: string) {
     window.localStorage.setItem(weakAreaStorageKey(certSlug), JSON.stringify(stats));
   } catch {
     // non-blocking
+  }
+}
+
+function saveAttemptHistory(
+  certSlug: string,
+  answeredCount: number,
+  correctCount: number,
+  finishedAt: string,
+) {
+  if (!answeredCount) return;
+
+  try {
+    const savedHistory = window.localStorage.getItem(attemptHistoryStorageKey);
+    const history = savedHistory ? JSON.parse(savedHistory) : [];
+    const previousAttempts = Array.isArray(history) ? history : [];
+    const percentage = Math.round((correctCount / answeredCount) * 100);
+
+    window.localStorage.setItem(
+      attemptHistoryStorageKey,
+      JSON.stringify(
+        [
+          {
+            certSlug,
+            answeredCount,
+            correctCount,
+            percentage,
+            finishedAt,
+          },
+          ...previousAttempts,
+        ].slice(0, 100),
+      ),
+    );
+  } catch {
+    // Insights are helpful, but must never block results submission.
   }
 }
 
@@ -328,7 +353,7 @@ async function saveExamToDatabase(
   const answerRows = questions
     .filter((q) => q.selectedAnswer !== undefined)
     .map((q) => {
-      const topic = getLearningTopicForQuestion(q);
+      const topic = getLearningTopicForQuestion({ ...q, certSlug: result.certSlug });
       return {
         exam_id: exam.id,
         user_id: user.id,
@@ -350,7 +375,7 @@ async function saveExamToDatabase(
 
 // ── Component ──
 
-export default function ExamPage() {
+function ExamContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -379,7 +404,6 @@ export default function ExamPage() {
 
   // Derive cert-specific constants
   const totalQuestions = useMemo(() => getTotalQuestions(certSlug), [certSlug]);
-  const paidTopicSlugs = useMemo(() => getPaidTopicSlugs(certSlug), [certSlug]);
   const freeTopicSlugsArr = useMemo(() => getFreeTopicSlugs(certSlug), [certSlug]);
   const domainOptions = useMemo(() => getDomainOptions(certSlug), [certSlug]);
   const currentProgressKey = useMemo(() => progressStorageKey(certSlug), [certSlug]);
@@ -399,7 +423,7 @@ export default function ExamPage() {
     selectedOption !== null &&
     currentQuestion.correctAnswer === selectedOption;
   const learningTopic = currentQuestion
-    ? getLearningTopicForQuestion(currentQuestion)
+    ? getLearningTopicForQuestion({ ...currentQuestion, certSlug })
     : null;
   const bufferedAhead = currentQuestion
     ? Math.max(0, questions.length - questionNumber)
@@ -718,6 +742,7 @@ export default function ExamPage() {
 
     saveWeakAreaStats(cleanedQuestions, certSlug);
     saveIncorrectAnswersToNotebook(cleanedQuestions, certSlug);
+    saveAttemptHistory(certSlug, answeredCount, score, finishedAt);
     void saveExamToDatabase(cleanedQuestions, {
       certSlug,
       mode,
@@ -1096,5 +1121,22 @@ export default function ExamPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ExamPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="exam-page">
+          <div className="exam-shell exam-center-state">
+            <div className="exam-spinner" />
+            <p>Loading simulator...</p>
+          </div>
+        </main>
+      }
+    >
+      <ExamContent />
+    </Suspense>
   );
 }

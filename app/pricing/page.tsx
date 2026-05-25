@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { FaCheck, FaLockOpen } from "react-icons/fa";
 import { getPricingInfo, isIndia } from "../lib/pricing";
 import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { isAdminEmail } from "../lib/admin";
-import { certifications, getCertification, type CertSlug } from "../certifications";
+import { certifications, type CertSlug } from "../certifications";
 
 const planStorageKey = "pmp-simulator-plan-v1";
 const paidUsersStorageKey = "pmp-simulator-paid-users-v1";
@@ -26,7 +26,7 @@ function isPaidPlan(plan: string | null) {
   return plan === "founder" || plan === "annual" || plan === "global";
 }
 
-export default function PricingPage() {
+function PricingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const certParam = searchParams.get("cert") as CertSlug | null;
@@ -244,5 +244,22 @@ export default function PricingPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="coming-page">
+          <section className="coming-shell">
+            <div className="exam-spinner" />
+            <p>Loading pricing...</p>
+          </section>
+        </main>
+      }
+    >
+      <PricingContent />
+    </Suspense>
   );
 }
