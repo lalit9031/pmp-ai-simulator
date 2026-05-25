@@ -72,22 +72,6 @@ export default function IntroPage() {
 
   return (
     <main className="intro-page">
-      <nav className="intro-nav" aria-label="Primary navigation">
-        <Link href="/" className="intro-brand">
-          PMP Simulator
-        </Link>
-        <div className="intro-nav-links">
-          <Link href="/exam">Exam</Link>
-          <Link href="/results">Results</Link>
-          <Link href="/learn">Learn</Link>
-          <Link href="/pricing">Pricing</Link>
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/login" className="intro-nav-action">
-            Login
-          </Link>
-        </div>
-      </nav>
-
       <section className="intro-hero">
         <div className="intro-copy">
           <p className="intro-eyebrow">PMI-style practice environment</p>

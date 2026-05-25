@@ -60,15 +60,11 @@ export default function PricingPage() {
   return (
     <main className="pricing-page">
       <section className="pricing-shell">
-        <nav className="intro-nav pricing-nav" aria-label="Pricing navigation">
-          <Link href="/" className="intro-brand">
-            PMP Simulator
+        <div className="pricing-nav">
+          <Link href="/learn" className="learn-back-link">
+            &larr; Learning Hub
           </Link>
-          <div className="intro-nav-links">
-            <Link href="/learn">Learn</Link>
-            <Link href="/login">Login</Link>
-          </div>
-        </nav>
+        </div>
 
         <div className="pricing-header">
           <p className="intro-eyebrow">Paid Plan</p>
