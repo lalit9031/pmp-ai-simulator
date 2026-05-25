@@ -40,6 +40,7 @@ export default function SiteNav() {
   }, [pathname]);
 
   const handleLogout = async () => {
+    setUser(null);
     window.localStorage.removeItem(userStorageKey);
     window.localStorage.removeItem("pmp-simulator-plan-v1");
 
