@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaSignOutAlt, FaUser, FaBars, FaTimes, FaMoon, FaSun } from "react-icons/fa";
+import { FaSignOutAlt, FaUser, FaBars, FaTimes, FaMoon, FaSun, FaChevronDown } from "react-icons/fa";
 import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { useTheme } from "../lib/ThemeProvider";
 import { isAdminEmail } from "../lib/admin";
+import { certifications } from "../certifications";
 
 const userStorageKey = "pmp-simulator-user-v1";
 
@@ -33,12 +34,45 @@ export default function SiteNav() {
     }
   }, []);
 
+  const [currentCert, setCurrentCert] = useState<string>("pmp");
+
   const closeMenu = () => setMenuOpen(false);
 
   // Close menu on route change (e.g. browser back button)
   useEffect(() => {
     closeMenu();
   }, [pathname]);
+
+  // Read current cert from URL search params
+  const syncCertFromUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+    const cert = params.get("cert");
+    setCurrentCert(cert && cert in certifications ? cert : "pmp");
+  };
+
+  useEffect(() => {
+    syncCertFromUrl();
+  }, [pathname]);
+
+  // Handle browser back/forward within the same pathname
+  useEffect(() => {
+    window.addEventListener("popstate", syncCertFromUrl);
+    return () => window.removeEventListener("popstate", syncCertFromUrl);
+  }, []);
+
+  const handleCertChange = (certSlug: string) => {
+    const params = new URLSearchParams(window.location.search);
+    if (certSlug === "pmp") {
+      params.delete("cert");
+    } else {
+      params.set("cert", certSlug);
+    }
+    const qs = params.toString();
+    const href = pathname + (qs ? `?${qs}` : "");
+    setCurrentCert(certSlug);
+    closeMenu();
+    router.push(href);
+  };
 
   const handleLogout = async () => {
     setUser(null);
@@ -100,6 +134,22 @@ export default function SiteNav() {
         <Link href="/pricing">Pricing</Link>
         <Link href="/dashboard">Dashboard</Link>
         {isAdmin && <Link href="/admin">Admin</Link>}
+        {/* Certification selector */}
+        <div className="site-cert-selector">
+          <select
+            value={currentCert}
+            onChange={(e) => handleCertChange(e.target.value)}
+            className="site-cert-select"
+            aria-label="Select certification"
+          >
+            {Object.values(certifications).map((cert) => (
+              <option key={cert.slug} value={cert.slug}>
+                {cert.shortName}
+              </option>
+            ))}
+          </select>
+          <FaChevronDown className="site-cert-select-arrow" aria-hidden="true" />
+        </div>
         <button
           type="button"
           onClick={toggleTheme}
@@ -192,6 +242,25 @@ export default function SiteNav() {
               Admin
             </Link>
           )}
+          {/* Mobile certification selector */}
+          <div className="site-mobile-cert-row">
+            <span className="site-mobile-cert-label">Certification</span>
+            <div className="site-cert-selector site-cert-selector-mobile">
+              <select
+                value={currentCert}
+                onChange={(e) => handleCertChange(e.target.value)}
+                className="site-cert-select"
+                aria-label="Select certification"
+              >
+                {Object.values(certifications).map((cert) => (
+                  <option key={cert.slug} value={cert.slug}>
+                    {cert.icon} {cert.shortName}
+                  </option>
+                ))}
+              </select>
+              <FaChevronDown className="site-cert-select-arrow" aria-hidden="true" />
+            </div>
+          </div>
           <div className="site-mobile-divider" />
           {displayName ? (
             <div className="site-mobile-user-section">

@@ -558,6 +558,78 @@ body {
   color: #7f1d1d;
 }
 
+/* Certification selector — desktop */
+.site-cert-selector {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.site-cert-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  background: var(--surface-bg);
+  color: var(--page-text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 30px 6px 12px;
+  line-height: 1.4;
+  outline: none;
+  transition: border-color 160ms ease, background-color 160ms ease;
+  min-width: 110px;
+}
+
+.site-cert-select:hover {
+  border-color: var(--hover-border);
+  background: var(--hover-bg);
+}
+
+.site-cert-select:focus-visible {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 2px var(--accent-blue-bg);
+}
+
+.site-cert-select-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--muted-text);
+  font-size: 10px;
+}
+
+/* Mobile cert selector row */
+.site-mobile-cert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  gap: 12px;
+}
+
+.site-mobile-cert-label {
+  color: var(--muted-text);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.site-cert-selector-mobile {
+  flex: 1;
+}
+
+.site-cert-selector-mobile .site-cert-select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 30px 8px 12px;
+  font-size: 14px;
+}
+
 /* Theme toggle button — desktop */
 .site-theme-btn {
   display: inline-flex;
