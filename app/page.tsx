@@ -159,6 +159,62 @@ export default function IntroPage() {
           );
         })}
       </section>
+
+      {/* Paid benefits section — only shown to signed-in free users */}
+      {isSignedIn && !hasPaidPlan && (
+        <section className="intro-benefits" aria-label="Paid plan benefits">
+          <div className="intro-benefits-header">
+            <p className="intro-eyebrow">Unlock Full Access</p>
+            <h2>Why go paid?</h2>
+            <p>
+              Get the complete PMP exam experience with AI-powered questions,
+              unlimited topics, and detailed analytics.
+            </p>
+          </div>
+          <div className="intro-benefits-grid">
+            <div className="intro-benefit-card intro-benefit-featured">
+              <span className="intro-benefit-icon">🤖</span>
+              <h3>AI-Powered Questions</h3>
+              <p>
+                Unlimited AI-generated PMP questions covering all domains,
+                updated with latest PMI trends including ESG and business value.
+              </p>
+            </div>
+            <div className="intro-benefit-card">
+              <span className="intro-benefit-icon">📚</span>
+              <h3>All Topics Unlocked</h3>
+              <p>
+                Full access to every PMP knowledge area, not just 4 core
+                topics. Learn Agile, Risk, Stakeholder, and beyond.
+              </p>
+            </div>
+            <div className="intro-benefit-card">
+              <span className="intro-benefit-icon">📊</span>
+              <h3>Advanced Analytics</h3>
+              <p>
+                Track domain-wise performance, identify weak areas, and get
+                personalized learning recommendations.
+              </p>
+            </div>
+            <div className="intro-benefit-card">
+              <span className="intro-benefit-icon">🏆</span>
+              <h3>Live Exam Simulator</h3>
+              <p>
+                Full 185-question timed exam with real PMP-style questions,
+                just like the actual PMI certification test.
+              </p>
+            </div>
+          </div>
+          <div className="intro-benefits-actions">
+            <Link href="/pricing" className="intro-primary-action">
+              View Plans &amp; Pricing
+            </Link>
+            <Link href="/exam?plan=free&fresh=1" className="intro-secondary-action">
+              Continue Free
+            </Link>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

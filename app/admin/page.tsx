@@ -7,6 +7,7 @@ import { FaShieldAlt } from "react-icons/fa";
 import type { SignupRecord } from "../api/signup-data/route";
 import type { ProfileRecord } from "../api/profiles/route";
 import { isAdminEmail } from "../lib/admin";
+import { showToast } from "../components/Toast";
 
 const userStorageKey = "pmp-simulator-user-v1";
 
@@ -37,6 +38,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [authorized, setAuthorized] = useState<boolean | null>(null);
+  const [markingUserId, setMarkingUserId] = useState<string | null>(null);
+  const [markingPlan, setMarkingPlan] = useState<string>("founder");
+  const [markingStatus, setMarkingStatus] = useState<string | null>(null);
 
   // Check admin authorization
   useEffect(() => {
@@ -56,6 +60,30 @@ export default function AdminPage() {
       setAuthorized(false);
     }
   }, []);
+
+  const handleMarkPaid = async (userId: string, email: string | null) => {
+    setMarkingStatus("saving");
+    try {
+      const res = await fetch("/api/mark-paid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, email, plan: markingPlan }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setMarkingStatus(data.error ?? "Failed to mark as paid");
+        showToast("error", data.error ?? "Failed to mark as paid");
+        return;
+      }
+      setMarkingStatus("done");
+      setMarkingUserId(null);
+      showToast("success", `User marked as ${markingPlan}!`);
+      // Refresh data
+      void fetchData();
+    } catch {
+      setMarkingStatus("Network error");
+    }
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -171,6 +199,7 @@ export default function AdminPage() {
               <th>Name</th>
               <th>Email</th>
               <th>Plan</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -190,6 +219,60 @@ export default function AdminPage() {
                   <span className={`admin-badge ${planBadgeClass(profile.plan)}`}>
                     {profile.plan}
                   </span>
+                </td>
+                <td>
+                  {profile.plan === "free" ? (
+                    markingUserId === profile.id ? (
+                      <div className="admin-mark-row">
+                        <select
+                          className="admin-mark-select"
+                          value={markingPlan}
+                          onChange={(e) => setMarkingPlan(e.target.value)}
+                          disabled={markingStatus === "saving"}
+                        >
+                          <option value="founder">Founder</option>
+                          <option value="annual">Annual</option>
+                          <option value="global">Global</option>
+                        </select>
+                        <button
+                          type="button"
+                          className="admin-mark-btn admin-mark-btn-confirm"
+                          onClick={() => void handleMarkPaid(profile.id, profile.email)}
+                          disabled={markingStatus === "saving"}
+                        >
+                          {markingStatus === "saving" ? "Saving..." : "Confirm"}
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-mark-btn admin-mark-btn-cancel"
+                          onClick={() => {
+                            setMarkingUserId(null);
+                            setMarkingPlan("founder");
+                            setMarkingStatus(null);
+                          }}
+                          disabled={markingStatus === "saving"}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="admin-mark-btn admin-mark-btn-action"
+                        onClick={() => {
+                          setMarkingUserId(profile.id);
+                          setMarkingPlan("founder");
+                          setMarkingStatus(null);
+                        }}
+                      >
+                        Mark Paid
+                      </button>
+                    )
+                  ) : (
+                    <span className="admin-cell-muted" style={{ fontSize: 13 }}>
+                      Paid
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -254,9 +337,10 @@ export default function AdminPage() {
             <tr>
               <th>#</th>
               <th>Date</th>
+              <th>Name</th>
               <th>Email</th>
               <th>Plan</th>
-              <th>User ID</th>
+              <th>Source</th>
             </tr>
           </thead>
           <tbody>
@@ -272,14 +356,15 @@ export default function AdminPage() {
                     minute: "2-digit",
                   })}
                 </td>
+                <td>{signup.user_name || "\u2014"}</td>
                 <td>{signup.email || "\u2014"}</td>
                 <td>
                   <span className={`admin-badge ${planBadgeClass(signup.plan)}`}>
                     {signup.plan}
                   </span>
                 </td>
-                <td className="admin-cell-muted admin-monospace">
-                  {signup.user_id || "\u2014"}
+                <td className="admin-cell-muted" style={{ fontSize: 13 }}>
+                  {signup.user_id ? "Checkout" : "Admin"}
                 </td>
               </tr>
             ))}

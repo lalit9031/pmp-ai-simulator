@@ -7,6 +7,7 @@ export type SignupRecord = {
   email: string | null;
   plan: string;
   created_at: string;
+  user_name?: string | null;
 };
 
 export async function GET() {
@@ -34,9 +35,37 @@ export async function GET() {
       );
     }
 
+    const signups = (data ?? []) as SignupRecord[];
+
+    // Enrich with user names from profiles table
+    const userIds = signups
+      .map((s) => s.user_id)
+      .filter((id): id is string => id !== null);
+
+    let profileMap: Record<string, string | null> = {};
+
+    if (userIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: profiles } = await (supabase as any)
+        .from("profiles")
+        .select("id, name")
+        .in("id", userIds);
+
+      if (profiles) {
+        for (const p of profiles as Array<{ id: string; name: string | null }>) {
+          profileMap[p.id] = p.name;
+        }
+      }
+    }
+
+    const enrichedSignups = signups.map((s) => ({
+      ...s,
+      user_name: s.user_id ? profileMap[s.user_id] ?? null : null,
+    }));
+
     return NextResponse.json({
-      signups: (data ?? []) as SignupRecord[],
-      total: (data ?? []).length,
+      signups: enrichedSignups,
+      total: enrichedSignups.length,
     });
   } catch (error) {
     console.error("Unexpected error fetching signup data:", error);

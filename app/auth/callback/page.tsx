@@ -22,7 +22,7 @@ export default function AuthCallbackPage() {
       window.location.hash.replace("#", "?"),
     );
 
-    const nextPath = params.get("next") || hashParams.get("next") || "/dashboard";
+    const nextPath = params.get("next") || hashParams.get("next") || "/";
 
     if (!supabase || !supabase.auth) {
       setMessage("Supabase is not configured.");
@@ -112,7 +112,7 @@ export default function AuthCallbackPage() {
 
         // Redirect to the destination
         window.location.replace(
-          nextPath.startsWith("/") ? nextPath : "/dashboard",
+          nextPath.startsWith("/") ? nextPath : "/",
         );
       } catch (err) {
         setMessage("Something went wrong during sign in.");

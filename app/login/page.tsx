@@ -41,8 +41,8 @@ export default function LoginPage() {
 
     const nextPath =
       new URLSearchParams(window.location.search).get("next") ??
-      "/exam?plan=free&fresh=1";
-    router.push(nextPath.startsWith("/") ? nextPath : "/exam?plan=free&fresh=1");
+      "/";
+    router.push(nextPath.startsWith("/") ? nextPath : "/");
   };
 
   const handleEmailLogin = (event: FormEvent<HTMLFormElement>) => {
@@ -53,7 +53,7 @@ export default function LoginPage() {
     if (supabase) {
       const nextPath =
         new URLSearchParams(window.location.search).get("next") ??
-        "/dashboard";
+        "/";
 
       window.localStorage.setItem("pmp-pending-login-name", name.trim());
       void supabase.auth
@@ -90,7 +90,7 @@ export default function LoginPage() {
   const handleGoogleLogin = () => {
     const supabase = getSupabaseBrowserClient();
     const nextPath =
-      new URLSearchParams(window.location.search).get("next") ?? "/dashboard";
+      new URLSearchParams(window.location.search).get("next") ?? "/";
 
     if (!supabase || !isSupabaseConfigured()) {
       setAuthError(
