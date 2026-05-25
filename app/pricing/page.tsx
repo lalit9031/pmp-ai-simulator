@@ -180,10 +180,6 @@ export default function PricingPage() {
               {founderAvailable
                 ? `${100 - paidUsers} founder ${100 - paidUsers === 1 ? "seat" : "seats"} left at ${pricing.label}.`
                 : `Founder pricing is complete. Annual access is ${pricing.label}.`}
-              {" "}
-              {userInIndia
-                ? "Learners outside India pay in USD."
-                : "Learners in India pay in INR."}
             </p>
 
             <button

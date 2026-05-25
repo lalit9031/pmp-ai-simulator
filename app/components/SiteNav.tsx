@@ -96,6 +96,7 @@ export default function SiteNav() {
         <Link href="/learn">Learn</Link>
         <Link href="/pricing">Pricing</Link>
         <Link href="/dashboard">Dashboard</Link>
+        <Link href="/admin">Admin</Link>
         <button
           type="button"
           onClick={toggleTheme}
@@ -179,6 +180,9 @@ export default function SiteNav() {
           </Link>
           <Link href="/dashboard" className="site-mobile-link" onClick={closeMenu}>
             Dashboard
+          </Link>
+          <Link href="/admin" className="site-mobile-link" onClick={closeMenu}>
+            Admin
           </Link>
           <div className="site-mobile-divider" />
           {displayName ? (
