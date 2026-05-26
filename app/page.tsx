@@ -59,12 +59,22 @@ export default function IntroPage() {
       <section className="intro-hero">
         <FadeIn>
         <div className="intro-copy">
-          <p className="intro-eyebrow">Multi-Certification Practice Environment</p>
-          <h1>Exam Simulator</h1>
+          <p className="intro-eyebrow">
+            <span className="intro-eyebrow-dot" />
+            Multi-Certification Platform
+          </p>
+          <h1>
+            Master Your
+            <br />
+            Certification Exam
+          </h1>
+          <span className="intro-hero-tagline">
+            PMP &bull; PMI-ACP &bull; CAPM &bull; CSM &bull; PSM I &bull; Six Sigma
+          </span>
           <p className="intro-lede">
-            Prepare for PMP, PMI-ACP, CAPM, CSM, PSM I, or study Six Sigma.
-            Practice with AI-powered questions, track your progress, and upgrade
-            when you are ready for the full version.
+            Prepare with AI-powered practice questions, timed exam simulations,
+            and personalized learning recommendations. Track your progress
+            across multiple certifications in one place.
           </p>
           <div className="intro-actions">
             <ScaleOnHover>
@@ -94,7 +104,6 @@ export default function IntroPage() {
                 key={cert.slug}
                 href={`/exam?cert=${cert.slug}&plan=free&fresh=1`}
                 className="intro-cert-badge"
-                style={{ borderLeftColor: cert.color }}
                 title={cert.title}
               >
                 <span>{cert.icon}</span>
@@ -110,12 +119,50 @@ export default function IntroPage() {
         </SlideUp>
       </section>
 
+      {/* Social proof stats */}
+      <StaggerContainer className="intro-stats-row">
+        <StaggerItem>
+          <div className="intro-stat-item">
+            <span className="intro-stat-value">6</span>
+            <span className="intro-stat-label">Certifications</span>
+          </div>
+        </StaggerItem>
+        <StaggerItem>
+          <div className="intro-stat-item">
+            <span className="intro-stat-value">500+</span>
+            <span className="intro-stat-label">Questions</span>
+          </div>
+        </StaggerItem>
+        <StaggerItem>
+          <div className="intro-stat-item">
+            <span className="intro-stat-value">4</span>
+            <span className="intro-stat-label">Study Modes</span>
+          </div>
+        </StaggerItem>
+        <StaggerItem>
+          <div className="intro-stat-item">
+            <span className="intro-stat-value">AI</span>
+            <span className="intro-stat-label">Powered</span>
+          </div>
+        </StaggerItem>
+      </StaggerContainer>
+
+      {/* Section divider */}
+      <div className="intro-section-divider">
+        <div className="intro-section-divider-line" />
+        <span>Certifications</span>
+        <div className="intro-section-divider-line" />
+      </div>
+
       {/* Certification cards */}
       <section className="intro-certs" aria-label="Certifications">
         <FadeIn>
         <div className="intro-certs-header">
-          <p className="intro-eyebrow">Certifications</p>
-          <h2>Choose your certification path</h2>
+          <p className="intro-eyebrow">
+            <span className="intro-eyebrow-dot" />
+            Choose Your Path
+          </p>
+          <h2>Pick a certification to practice</h2>
           <p>
             Each certification includes domain-specific questions, timed exam
             simulations, and personalized learning recommendations.
@@ -129,7 +176,7 @@ export default function IntroPage() {
             <Link
               href={`/exam?cert=${cert.slug}&plan=free&fresh=1`}
               className="intro-cert-card"
-              style={{ borderTopColor: cert.color }}
+              style={{ color: cert.color }}
             >
               <div className="intro-cert-card-top">
                 <span className="intro-cert-card-icon">{cert.icon}</span>
@@ -137,7 +184,7 @@ export default function IntroPage() {
                   {cert.type === "exam" ? "Exam" : "Learning"}
                 </span>
               </div>
-              <h3>{cert.title}</h3>
+              <h3>{cert.shortName}</h3>
               <p>{cert.description}</p>
               <div className="intro-cert-card-meta">
                 {cert.type === "exam" && (
@@ -158,6 +205,13 @@ export default function IntroPage() {
           ))}
         </StaggerContainer>
       </section>
+
+      {/* Section divider */}
+      <div className="intro-section-divider">
+        <div className="intro-section-divider-line" />
+        <span>Quick Access</span>
+        <div className="intro-section-divider-line" />
+      </div>
 
       <StaggerContainer className="intro-routes" aria-label="Application routes">
         <StaggerItem>
@@ -204,12 +258,22 @@ export default function IntroPage() {
         </StaggerItem>
       </StaggerContainer>
 
+      {/* Section divider */}
+      <div className="intro-section-divider">
+        <div className="intro-section-divider-line" />
+        <span>Unlock More</span>
+        <div className="intro-section-divider-line" />
+      </div>
+
       {isSignedIn && !hasPaidPlan && (
         <FadeIn>
         <section className="intro-benefits" aria-label="Paid plan benefits">
           <SlideUp>
           <div className="intro-benefits-header">
-            <p className="intro-eyebrow">Unlock Full Access</p>
+            <p className="intro-eyebrow">
+              <span className="intro-eyebrow-dot" />
+              Unlock Full Access
+            </p>
             <h2>Why go paid?</h2>
             <p>
               Get the complete exam experience with AI-powered questions,
