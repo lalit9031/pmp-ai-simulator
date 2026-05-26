@@ -7,9 +7,20 @@ export type CertSlug = "pmp" | "pmi-acp" | "capm" | "csm" | "psm-i" | "six-sigma
 
 export type CertType = "exam" | "learning";
 
+/** Question type identifiers for the exam */
+export type QuestionType =
+  | "multiple-choice"      // Single-select (standard)
+  | "multiple-response"    // Select all that apply
+  | "matching"             // Match items in two columns
+  | "fill-in-blank"        // Type a number or short answer
+  | "hotspot"              // Drag to order / click correct area
+  | "situational";          // Scenario-based (standard PMP style)
+
 export type DomainOption = {
   label: string;
   paidOnly?: boolean;
+  /** Sub-topics within this domain */
+  subTopics?: string[];
 };
 
 export type Certification = {
@@ -51,18 +62,23 @@ export const certifications: Record<CertSlug, Certification> = {
     timeLimitMinutes: 240,
     domains: [
       { label: "Mixed" },
-      { label: "Agile" },
-      { label: "Risk" },
-      { label: "Stakeholder" },
-      { label: "Hybrid" },
-      { label: "AI Ethics", paidOnly: true },
-      { label: "Sustainability", paidOnly: true },
-      { label: "Business Environment", paidOnly: true },
+      {
+        label: "People",
+        subTopics: ["Managing Conflict", "Leading Teams", "Supporting Performance", "Empowering Stakeholders"],
+      },
+      {
+        label: "Process",
+        subTopics: ["Predictive Execution", "Agile Execution", "Hybrid Execution", "Budget Management", "Change Control"],
+      },
+      {
+        label: "Business Environment",
+        subTopics: ["Organizational Change", "External Business Impacts", "Compliance", "Strategic Alignment"],
+      },
     ],
     defaultDomain: "Mixed",
     difficulties: ["Mixed", "Easy", "Medium", "Hard"],
     freeTopicSlugs: ["agile", "risk", "stakeholder", "hybrid"],
-    topicSlugs: ["agile", "risk", "stakeholder", "hybrid", "ai", "sustainability", "value"],
+    topicSlugs: ["agile", "risk", "stakeholder", "hybrid", "ai", "sustainability", "value", "people", "process", "business-environment"],
     icon: "📋",
     color: "#2563eb",
     storagePrefix: "pmp",

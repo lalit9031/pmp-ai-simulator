@@ -58,10 +58,12 @@ function weakAreaStorageKey(certSlug: string) {
 function getQuestionDomain(question: ResultQuestion) {
   if (question.domain && question.domain !== "Mixed") return question.domain;
   const text = question.question.toLowerCase();
-  if (text.includes("risk")) return "Risk";
-  if (text.includes("stakeholder")) return "Stakeholder";
-  if (text.includes("agile") || text.includes("sprint")) return "Agile";
-  if (text.includes("hybrid")) return "Hybrid";
+  if (text.includes("people") || text.includes("team member") || text.includes("conflict") || text.includes("stakeholder") || text.includes("mentor") || text.includes("empower")) return "People";
+  if (text.includes("process") || text.includes("budget") || text.includes("scope") || text.includes("schedule") || text.includes("change") || text.includes("method") || text.includes("phase")) return "Process";
+  if (text.includes("business environment") || text.includes("regulation") || text.includes("audit") || text.includes("compliance") || text.includes("restructur") || text.includes("standard") || text.includes("external")) return "Business Environment";
+  if (text.includes("risk")) return "Process";
+  if (text.includes("agile") || text.includes("sprint")) return "Process";
+  if (text.includes("hybrid")) return "Process";
   return "General";
 }
 

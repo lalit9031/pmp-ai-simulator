@@ -29,7 +29,7 @@ const pmbFallback = {
   ],
   mindsetTip:
     "PMI mindset: collaborate first, clarify constraints, then tailor the delivery approach instead of forcing one method.",
-  domain: "Hybrid",
+  domain: "Process",
   topic: "Hybrid Delivery Governance",
   difficulty: "Medium",
   source: "fallback",
@@ -184,17 +184,25 @@ function buildSystemPrompt(
   const promptTemplates: Record<string, string> = {
     pmp: `Generate one PMP-style ${difficulty.toLowerCase()} question for "${domain}" practice.
 
+This follows the official PMP Exam Content Outline domains:
+- **People**: Managing conflict, leading teams, supporting performance, and empowering stakeholders
+- **Process**: Executing projects using predictive/agile/hybrid methodologies, managing budgets, controlling changes
+- **Business Environment**: Supporting organizational change and evaluating external business impacts
+
 Requirements:
 - Scenario-based with realistic project context (agile, predictive, or hybrid)
 - 4 options with one correct answer
 - Align with PMI mindset (servant leadership, stakeholder engagement, value delivery)
+- If domain is a specific one (People, Process, Business Environment), make the question clearly relevant to that domain
 - Include concise explanation covering the rationale
 - Include why each of the 4 options is right or wrong
 - Include a PMI mindset tip
-- Include a short topic label (e.g., "Risk Response", "Stakeholder Engagement")
+- Include a short topic label (e.g., "Conflict Resolution", "Budget Management", "Organizational Change")
 - Avoid trick wording; make the best answer defensible through PMP logic
 
-Return ONLY valid JSON with fields: question, options, correctAnswer, explanation, whyOthersWrong, mindsetTip, domain, topic, difficulty`,
+Also include a "questionType" field: one of "multiple-choice", "multiple-response", "situational", "matching", "fill-in-blank", or "hotspot". Default to "situational" for most.
+
+Return ONLY valid JSON with fields: question, options, correctAnswer, explanation, whyOthersWrong, mindsetTip, domain, topic, difficulty, questionType`,
 
     "pmi-acp": `Generate one PMI-ACP®-style ${difficulty.toLowerCase()} question for "${domain}" practice.
 

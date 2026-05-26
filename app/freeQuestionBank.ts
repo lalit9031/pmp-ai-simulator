@@ -14,6 +14,42 @@ type FreeQuestion = {
 };
 
 const topicScenarios = {
+  people: [
+    "two senior team members have conflicting approaches to a critical deliverable",
+    "a new team member is struggling with the agile workflow and their velocity is low",
+    "a stakeholder is consistently late providing input, delaying team progress",
+    "team morale is declining due to unclear project priorities",
+    "a remote team member feels excluded from decision-making",
+    "a team member is reluctant to share bad news about their progress",
+    "the project team lacks diversity in skills needed for upcoming work",
+    "a key contributor is burning out from overtime",
+    "a team member's personal conflict is affecting team collaboration",
+    "the project manager needs to delegate authority to junior team leads",
+  ],
+  "process": [
+    "stakeholders request significant scope changes during a sprint review",
+    "the project budget is trending over allocation due to unforeseen rework",
+    "a predictive project phase is complete but formal sign-off is delayed",
+    "the team is debating between a predictive and agile approach for a new module",
+    "a change request is submitted but the impact analysis is incomplete",
+    "quality metrics show a defect trend that was not detected during reviews",
+    "the schedule baseline needs to be updated after approved changes",
+    "integration testing reveals incompatibility between two vendor deliverables",
+    "a key milestone is at risk because dependency management was unclear",
+    "earned value analysis shows the project is behind schedule but under budget",
+  ],
+  "business-environment": [
+    "new government regulations could affect how customer data is handled",
+    "the organization is restructuring and the sponsor may be reassigned",
+    "an external audit finds procurement does not meet sustainability standards",
+    "a competitor's new product changes the market assumptions in the business case",
+    "the economy is slowing and the organization is freezing new project funding",
+    "a merger announcement creates uncertainty about project priorities",
+    "new industry standards require updates to project deliverables",
+    "a geopolitical event threatens the global supply chain for project materials",
+    "the customer's industry is undergoing regulatory changes that affect scope",
+    "organizational leadership changes the strategic priority of the project",
+  ],
   agile: [
     "testing keeps slipping to the end of the sprint",
     "the product owner is unavailable for backlog decisions",
@@ -101,6 +137,60 @@ const topicScenarios = {
 } as const;
 
 const topicTemplates = {
+  people: {
+    correct: [
+      "Facilitate open discussion to understand both perspectives and guide the team toward a collaborative decision",
+      "Provide coaching and mentoring to help the team member develop the needed skills",
+      "Engage the stakeholder directly to understand barriers and agree on a realistic engagement plan",
+      "Recognize contributions publicly and empower team members to take ownership",
+    ],
+    wrong: [
+      "Escalate the conflict to the sponsor without discussing it with the team first",
+      "Replace underperforming team members without providing coaching or support",
+      "Proceed without the stakeholder's input and let them catch up later",
+      "Assign blame for the issue and document it in the performance records",
+    ],
+    explanation:
+      "The People domain of PMP focuses on conflict resolution, team leadership, performance support, and stakeholder empowerment. The project manager should use servant leadership and coaching before escalation or replacement.",
+    mindset:
+      "Lead through collaboration and empowerment. Support your team before judging them.",
+  },
+  "process": {
+    correct: [
+      "Assess the impact on scope, schedule, and budget before making or approving changes",
+      "Analyze variance drivers with the team and evaluate corrective options",
+      "Follow the governance process to secure approvals and document decisions",
+      "Align the delivery approach with the project constraints using appropriate lifecycle practices",
+    ],
+    wrong: [
+      "Immediately approve changes to keep stakeholders satisfied without analysis",
+      "Request additional budget or time before understanding the root cause",
+      "Ignore the variance and continue with the original plan",
+      "Force every workstream to use the same delivery method",
+    ],
+    explanation:
+      "The Process domain covers executing projects using predictive, agile, and hybrid methodologies, managing budgets, and controlling changes. Data-driven analysis should precede any corrective action.",
+    mindset:
+      "Understand the variance first, then choose the right process for the situation.",
+  },
+  "business-environment": {
+    correct: [
+      "Evaluate the external change's impact on the project with relevant experts",
+      "Communicate transparently with the team and stakeholders about organizational shifts",
+      "Update compliance and alignment procedures based on the new requirements",
+      "Reassess the business case and strategic alignment in light of external factors",
+    ],
+    wrong: [
+      "Ignore the external change and continue with the original plan",
+      "Immediately halt all project work until external uncertainty is resolved",
+      "Escalate without first analyzing the impact or gathering information",
+      "Assume the project is unaffected without conducting an assessment",
+    ],
+    explanation:
+      "The Business Environment domain tests the project manager's ability to support organizational change, evaluate external business impacts, and maintain strategic alignment. Proactive evaluation is critical.",
+    mindset:
+      "External factors always affect projects. Assess impact quickly and adjust proactively.",
+  },
   agile: {
     correct: [
       "Facilitate a team discussion to inspect the issue and agree on an improvement",
@@ -270,8 +360,8 @@ export function buildFreeTopicQuestions(topicSlug: string): FreeQuestion[] {
           : "This is weaker because it is premature, reactive, overly forceful, or skips the analysis and collaboration expected in PMP questions.",
       ),
       mindsetTip: template.mindset,
-      domain: topic?.domain ?? "Agile",
-      topic: topic?.title ?? "Agile Team Facilitation",
+      domain: topic?.domain ?? (topicSlug === "people" ? "People" : topicSlug === "process" ? "Process" : topicSlug === "business-environment" ? "Business Environment" : "Agile"),
+      topic: topic?.title ?? topicSlug === "people" ? "Leading Teams" : topicSlug === "process" ? "Process Execution" : topicSlug === "business-environment" ? "Organizational Change" : "Agile Team Facilitation",
       difficulty: difficultyCycle[index % difficultyCycle.length],
       source: "free-topic-bank",
     };

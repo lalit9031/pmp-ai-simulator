@@ -10,7 +10,7 @@ import {
 } from "../freeQuestionBank";
 import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { getLearningTopicForQuestion, learningTopics } from "../learningTopics";
-import { getCertification, type CertSlug } from "../certifications";
+import { getCertification, type CertSlug, type QuestionType } from "../certifications";
 import { getStarterQuestions } from "../starterQuestions";
 
 type GeneratedQuestion = {
@@ -25,11 +25,20 @@ type GeneratedQuestion = {
   difficulty?: string;
   source?: string;
   warning?: string;
+  questionType?: QuestionType;
+  correctAnswers?: number[];
+  matchItems?: { left: string; right: string }[];
+  blankType?: "number" | "text";
+  orderItems?: string[];
 };
 
 type ExamQuestion = GeneratedQuestion & {
   id: string;
   selectedAnswer?: number;
+  selectedAnswers?: number[];
+  matchAnswers?: { left: string; right: string }[];
+  blankAnswer?: string;
+  orderedItems?: string[];
   markedForReview?: boolean;
   reviewed?: boolean;
   isCorrect?: boolean;
@@ -52,6 +61,10 @@ type SavedProgress = {
   questionBank?: GeneratedQuestion[];
   questionNumber?: number;
   selectedAnswers?: Record<number, number>;
+  selectedMultiAnswers?: Record<number, number[]>;
+  matchAnswerStore?: Record<number, { left: string; right: string }[]>;
+  blankAnswerStore?: Record<number, string>;
+  orderedAnswersStore?: Record<number, string[]>;
   reviewedAnswers?: Record<number, boolean>;
   markedForReview?: Record<number, boolean>;
   timeLeft?: number;
@@ -115,12 +128,13 @@ function toExamQuestion(
     ...cleanedQuestion,
     id: maybeExamQuestion.id ?? `starter-${index + 1}`,
     selectedAnswer: maybeExamQuestion.selectedAnswer,
+    selectedAnswers: maybeExamQuestion.selectedAnswers,
+    matchAnswers: maybeExamQuestion.matchAnswers,
+    blankAnswer: maybeExamQuestion.blankAnswer,
+    orderedItems: maybeExamQuestion.orderedItems,
     markedForReview: maybeExamQuestion.markedForReview ?? false,
     reviewed: maybeExamQuestion.reviewed ?? false,
-    isCorrect:
-      maybeExamQuestion.selectedAnswer === undefined
-        ? undefined
-        : maybeExamQuestion.selectedAnswer === cleanedQuestion.correctAnswer,
+    isCorrect: undefined,
   };
 }
 
@@ -135,15 +149,41 @@ function buildQuestionsFromSavedProgress(savedProgress: SavedProgress, certSlug:
 
   return baseQuestions.map((question, index) => {
     const selectedAnswer = savedProgress.selectedAnswers?.[index];
+    const selectedAnswers = savedProgress.selectedMultiAnswers?.[index];
+    const matchAnswers = savedProgress.matchAnswerStore?.[index];
+    const blankAnswer = savedProgress.blankAnswerStore?.[index];
+    const orderedItems = savedProgress.orderedAnswersStore?.[index];
+    const q = toExamQuestion(question, index);
+    const qType = question.questionType;
+    let isCorrect: boolean | undefined;
+    if (qType === "multiple-response" && selectedAnswers !== undefined) {
+      isCorrect =
+        selectedAnswers.length === question.correctAnswers?.length &&
+        selectedAnswers.every((a) => question.correctAnswers?.includes(a));
+    } else if (qType === "matching" && matchAnswers !== undefined) {
+      isCorrect = matchAnswers.every((m) => {
+        const match = question.matchItems?.find((mi) => mi.left === m.left);
+        return match?.right === m.right;
+      });
+    } else if (qType === "fill-in-blank" && blankAnswer !== undefined) {
+      isCorrect = blankAnswer.trim().toLowerCase() === question.options[question.correctAnswer].trim().toLowerCase();
+    } else if (qType === "hotspot" && orderedItems !== undefined) {
+      isCorrect =
+        orderedItems.length === question.orderItems?.length &&
+        orderedItems.every((item, i) => item === question.orderItems?.[i]);
+    } else if (selectedAnswer !== undefined) {
+      isCorrect = selectedAnswer === question.correctAnswer;
+    }
     return {
-      ...toExamQuestion(question, index),
+      ...q,
       selectedAnswer,
+      selectedAnswers,
+      matchAnswers,
+      blankAnswer,
+      orderedItems,
       markedForReview: savedProgress.markedForReview?.[index] ?? false,
       reviewed: savedProgress.reviewedAnswers?.[index] ?? false,
-      isCorrect:
-        selectedAnswer === undefined
-          ? undefined
-          : selectedAnswer === question.correctAnswer,
+      isCorrect,
     };
   });
 }
@@ -162,12 +202,13 @@ function getMindsetTip(question: GeneratedQuestion) {
   );
 }
 
-function saveMistakeToNotebook(question: ExamQuestion, selectedAnswer: number, certSlug: string) {  const topic = getLearningTopicForQuestion({ ...question, certSlug });
+function saveMistakeToNotebook(question: ExamQuestion, answer: string | number, certSlug: string) {
+  const topic = getLearningTopicForQuestion({ ...question, certSlug });
 
   const mistake = {
     id: `${question.id}-${Date.now()}`,
     question: cleanUserQuestionText(question.question),
-    selectedAnswer,
+    selectedAnswer: answer,
     correctAnswer: question.correctAnswer,
     explanation: question.explanation,
     domain: topic.domain,
@@ -193,13 +234,16 @@ function saveMistakeToNotebook(question: ExamQuestion, selectedAnswer: number, c
 
 function saveIncorrectAnswersToNotebook(questions: ExamQuestion[], certSlug: string) {
   questions
-    .filter(
-      (q) =>
-        q.selectedAnswer !== undefined &&
-        q.selectedAnswer !== q.correctAnswer,
-    )
+    .filter((q) => {
+      if (q.questionType === "multiple-response") {
+        const answers = q.selectedAnswers ?? [];
+        const correct = q.correctAnswers ?? [];
+        return answers.length !== correct.length || !answers.every((a) => correct.includes(a));
+      }
+      return q.selectedAnswer !== undefined && q.selectedAnswer !== q.correctAnswer;
+    })
     .forEach((q) => {
-      saveMistakeToNotebook(q, q.selectedAnswer as number, certSlug);
+      saveMistakeToNotebook(q, q.selectedAnswer ?? (q.selectedAnswers?.[0] ?? 0), certSlug);
     });
 }
 
@@ -251,8 +295,10 @@ function cleanUserQuestionText(question: string) {
     .trim();
 }
 
-function saveWeakAreaStats(questions: ExamQuestion[], certSlug: string) {
-  const answered = questions.filter((q) => q.selectedAnswer !== undefined);
+function saveWeakAreaStats(questions: ExamQuestion[], certSlug: string) {    const answered = questions.filter((q) => {
+    if (q.questionType === "multiple-response") return (q.selectedAnswers?.length ?? 0) > 0;
+    return q.selectedAnswer !== undefined;
+  });
   if (!answered.length) return;
 
   try {
@@ -414,22 +460,59 @@ function ExamContent() {
   const activeTotalQuestions = isFreeTopicPractice ? freeTopicQuestionCount : totalQuestions;
   const questionNumber = currentQuestionIndex + 1;
   const selectedOption = currentQuestion?.selectedAnswer ?? null;
+  const selectedMulti = currentQuestion?.selectedAnswers ?? [];
+  const matchAnswersMap = currentQuestion?.matchAnswers ?? [];
+  const blankAnswer = currentQuestion?.blankAnswer ?? "";
+  const questionType = currentQuestion?.questionType ?? (currentQuestion ? "multiple-choice" : "multiple-choice");
   const hasReviewedCurrent = currentQuestion?.reviewed === true;
-  const answeredCount = questions.filter((q) => q.selectedAnswer !== undefined).length;
+  const answeredCount = questions.filter((q) => {
+    if (q.questionType === "multiple-response") return (q.selectedAnswers?.length ?? 0) > 0;
+    if (q.questionType === "matching") return (q.matchAnswers?.length ?? 0) > 0;
+    if (q.questionType === "fill-in-blank") return (q.blankAnswer?.length ?? 0) > 0;
+    return q.selectedAnswer !== undefined;
+  }).length;
   const markedCount = questions.filter((q) => q.markedForReview).length;
   const visibleDomainOptions = hasPaidPlan
     ? domainOptions
     : domainOptions.filter((option) => !option.paidOnly);
-  const isCurrentCorrect =
-    currentQuestion &&
-    selectedOption !== null &&
-    currentQuestion.correctAnswer === selectedOption;
+  const isCurrentCorrect = currentQuestion
+    ? checkIfCorrect(currentQuestion)
+    : false;
   const learningTopic = currentQuestion
     ? getLearningTopicForQuestion({ ...currentQuestion, certSlug })
     : null;
   const bufferedAhead = currentQuestion
     ? Math.max(0, questions.length - questionNumber)
     : questions.length;
+
+  function getHasAnswer(q: ExamQuestion | null): boolean {
+    if (!q) return false;
+    if (q.questionType === "multiple-response") return (q.selectedAnswers?.length ?? 0) > 0;
+    if (q.questionType === "matching") return (q.matchAnswers?.length ?? 0) > 0;
+    if (q.questionType === "fill-in-blank") return (q.blankAnswer?.trim().length ?? 0) > 0;
+    if (q.questionType === "hotspot") return (q.orderedItems?.length ?? 0) > 0;
+    return q.selectedAnswer !== undefined;
+  }
+
+  function checkIfCorrect(q: ExamQuestion): boolean {
+    if (q.questionType === "multiple-response") {
+      const answers = q.selectedAnswers ?? [];
+      const correct = q.correctAnswers ?? [];
+      return answers.length === correct.length && answers.every((a) => correct.includes(a));
+    }
+    if (q.questionType === "matching") {
+      const answers = q.matchAnswers ?? [];
+      const items = q.matchItems ?? [];
+      return answers.length === items.length && answers.every((m) => {
+        const match = items.find((i) => i.left === m.left);
+        return match?.right === m.right;
+      });
+    }
+    if (q.questionType === "fill-in-blank") {
+      return q.blankAnswer?.trim().toLowerCase() === q.options[q.correctAnswer].trim().toLowerCase();
+    }
+    return q.selectedAnswer === q.correctAnswer;
+  }
 
   // Lock body scroll when help modal is open
   useEffect(() => {
@@ -453,8 +536,9 @@ function ExamContent() {
       // Ignore if user is typing in an input/select
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) return;
 
-      // 1-4 to select answer
-      if (e.key >= "1" && e.key <= "4" && !showAnswer && currentQuestion) {
+      // 1-4 to select answer (only for single-select types)
+      const singleSelectTypes = ["multiple-choice", "situational"];
+      if (e.key >= "1" && e.key <= "4" && !showAnswer && currentQuestion && singleSelectTypes.includes(questionType)) {
         const idx = parseInt(e.key) - 1;
         if (idx < currentQuestion.options.length) {
           e.preventDefault();
@@ -464,15 +548,19 @@ function ExamContent() {
       }
 
       // Enter to review answer (practice mode)
-      if (e.key === "Enter" && mode === "practice" && selectedOption !== null && !showAnswer) {
-        e.preventDefault();
-        handleReviewAnswer();
+      if (e.key === "Enter" && mode === "practice" && !showAnswer && currentQuestion) {
+        const hasAnswer = getHasAnswer(currentQuestion);
+        if (hasAnswer) {
+          e.preventDefault();
+          handleReviewAnswer();
+        }
         return;
       }
 
       // N/n for Next
       if ((e.key === "n" || e.key === "N") && !e.metaKey && !e.ctrlKey) {
-        if (selectedOption !== null && !(mode === "practice" && !hasReviewedCurrent)) {
+        const hasAnswer = getHasAnswer(currentQuestion);
+        if (hasAnswer && !(mode === "practice" && !hasReviewedCurrent)) {
           e.preventDefault();
           handleNext();
         }
@@ -702,33 +790,53 @@ function ExamContent() {
     if (!hasLoadedProgress) return;
 
     const selectedAnswers: Record<number, number> = {};
+    const selectedMultiAnswers: Record<number, number[]> = {};
+    const matchAnswerStore: Record<number, { left: string; right: string }[]> = {};
+    const blankAnswerStore: Record<number, string> = {};
+    const orderedAnswersStore: Record<number, string[]> = {};
     const reviewedAnswers: Record<number, boolean> = {};
     const markedForReview: Record<number, boolean> = {};
 
     questions.forEach((q, i) => {
-      if (q.selectedAnswer !== undefined) selectedAnswers[i] = q.selectedAnswer;
+      if (q.questionType === "multiple-response" && q.selectedAnswers) {
+        selectedMultiAnswers[i] = q.selectedAnswers;
+      } else if (q.questionType === "matching" && q.matchAnswers) {
+        matchAnswerStore[i] = q.matchAnswers;
+      } else if (q.questionType === "fill-in-blank" && q.blankAnswer !== undefined) {
+        blankAnswerStore[i] = q.blankAnswer;
+      } else if (q.questionType === "hotspot" && q.orderedItems) {
+        orderedAnswersStore[i] = q.orderedItems;
+      } else if (q.selectedAnswer !== undefined) {
+        selectedAnswers[i] = q.selectedAnswer;
+      }
       if (q.reviewed) reviewedAnswers[i] = true;
       if (q.markedForReview) markedForReview[i] = true;
     });
 
+    const progress: SavedProgress = {
+      certSlug,
+      accessType,
+      isFreeTopicPractice,
+      freeTopicSlug,
+      mode,
+      domain,
+      difficulty,
+      questions,
+      questionNumber,
+      selectedAnswers,
+      selectedMultiAnswers: Object.keys(selectedMultiAnswers).length ? selectedMultiAnswers : undefined,
+      matchAnswerStore: Object.keys(matchAnswerStore).length ? matchAnswerStore : undefined,
+      blankAnswerStore: Object.keys(blankAnswerStore).length ? blankAnswerStore : undefined,
+      orderedAnswersStore: Object.keys(orderedAnswersStore).length ? orderedAnswersStore : undefined,
+      reviewedAnswers,
+      markedForReview,
+      timeLeft,
+      score,
+    };
+
     window.localStorage.setItem(
       currentProgressKey,
-      JSON.stringify({
-        certSlug,
-        accessType,
-        isFreeTopicPractice,
-        freeTopicSlug,
-        mode,
-        domain,
-        difficulty,
-        questions,
-        questionNumber,
-        selectedAnswers,
-        reviewedAnswers,
-        markedForReview,
-        timeLeft,
-        score,
-      }),
+      JSON.stringify(progress),
     );
   }, [accessType, certSlug, currentProgressKey, difficulty, domain, freeTopicSlug, hasLoadedProgress, isFreeTopicPractice, mode, questions, questionNumber, score, timeLeft]);
 
@@ -746,6 +854,85 @@ function ExamContent() {
               selectedAnswer: index,
               reviewed: mode === "exam" ? q.reviewed : false,
               isCorrect: index === q.correctAnswer,
+            }
+          : q,
+      );
+      questionsRef.current = next;
+      return next;
+    });
+    setShowAnswer(false);
+  };
+
+  const handleMultiResponse = (indices: number[]) => {
+    setQuestions((prev) => {
+      const next = prev.map((q, i) =>
+        i === currentQuestionIndex
+          ? {
+              ...q,
+              selectedAnswers: indices,
+              reviewed: mode === "exam" ? q.reviewed : false,
+              isCorrect:
+                indices.length === q.correctAnswers?.length &&
+                indices.every((a) => q.correctAnswers?.includes(a)),
+            }
+          : q,
+      );
+      questionsRef.current = next;
+      return next;
+    });
+    setShowAnswer(false);
+  };
+
+  const handleMatching = (pairs: { left: string; right: string }[]) => {
+    setQuestions((prev) => {
+      const next = prev.map((q, i) =>
+        i === currentQuestionIndex
+          ? {
+              ...q,
+              matchAnswers: pairs,
+              reviewed: mode === "exam" ? q.reviewed : false,
+              isCorrect: pairs.length === q.matchItems?.length && pairs.every((m) => {
+                const match = q.matchItems?.find((mi) => mi.left === m.left);
+                return match?.right === m.right;
+              }),
+            }
+          : q,
+      );
+      questionsRef.current = next;
+      return next;
+    });
+    setShowAnswer(false);
+  };
+
+  const handleOrderChange = (items: string[]) => {
+    setQuestions((prev) => {
+      const next = prev.map((q, i) =>
+        i === currentQuestionIndex
+          ? {
+              ...q,
+              orderedItems: items,
+              reviewed: mode === "exam" ? q.reviewed : false,
+              isCorrect:
+                items.length === (q.orderItems?.length ?? 0) &&
+                items.every((item, idx) => item === q.orderItems?.[idx]),
+            }
+          : q,
+      );
+      questionsRef.current = next;
+      return next;
+    });
+    setShowAnswer(false);
+  };
+
+  const handleFillBlank = (value: string) => {
+    setQuestions((prev) => {
+      const next = prev.map((q, i) =>
+        i === currentQuestionIndex
+          ? {
+              ...q,
+              blankAnswer: value,
+              reviewed: mode === "exam" ? q.reviewed : false,
+              isCorrect: value.trim().toLowerCase() === q.options[q.correctAnswer].trim().toLowerCase(),
             }
           : q,
       );
@@ -776,7 +963,9 @@ function ExamContent() {
   };
 
   const handleReviewAnswer = () => {
-    if (selectedOption === null) return;
+    if (!currentQuestion) return;
+    const hasAnswer = getHasAnswer(currentQuestion);
+    if (!hasAnswer) return;
     setQuestions((prev) => {
       const next = prev.map((q, i) =>
         i === currentQuestionIndex ? { ...q, reviewed: true } : q,
@@ -784,8 +973,13 @@ function ExamContent() {
       questionsRef.current = next;
       return next;
     });
-    if (currentQuestion && selectedOption !== currentQuestion.correctAnswer) {
-      saveMistakeToNotebook(currentQuestion, selectedOption, certSlug);
+    if (!checkIfCorrect(currentQuestion)) {
+      const wrongAnswer = questionType === "multiple-response"
+        ? (selectedMulti[0] ?? 0)
+        : questionType === "hotspot"
+          ? (currentQuestion.orderedItems?.[0] ?? "")
+          : (selectedOption ?? 0);
+      saveMistakeToNotebook(currentQuestion, wrongAnswer, certSlug);
     }
     setShowAnswer(true);
   };
@@ -801,7 +995,7 @@ function ExamContent() {
   };
 
   const handleNext = () => {
-    if (!currentQuestion || selectedOption === null || (mode === "practice" && !hasReviewedCurrent)) return;
+    if (!currentQuestion || !getHasAnswer(currentQuestion) || (mode === "practice" && !hasReviewedCurrent)) return;
     if (questionNumber >= activeTotalQuestions) {
       handleSubmitExam();
       return;
@@ -990,7 +1184,7 @@ function ExamContent() {
             const index = number - 1;
             const isCurrent = number === questionNumber;
             const paletteQuestion = questions[index];
-            const isAnswered = paletteQuestion?.selectedAnswer !== undefined;
+            const isAnswered = getHasAnswer(paletteQuestion);
             const isMarked = paletteQuestion?.markedForReview === true;
             const isBuffered = index < questions.length;
 
@@ -1103,7 +1297,7 @@ function ExamContent() {
           <button
             type="button"
             onClick={handleReviewAnswer}
-            disabled={selectedOption === null || mode === "exam"}
+            disabled={!getHasAnswer(currentQuestion) || mode === "exam" || showAnswer}
             className="exam-button-red"
           >
             {mode === "exam" ? "Review After Submit" : "Review Answer"}
@@ -1164,9 +1358,18 @@ function ExamContent() {
                   <div className="exam-question-meta">
                     <h1 className="exam-muted-title">
                       Question {questionNumber}
-                      <span className="kbd-hint" style={{ marginLeft: 8 }}>1-4</span>
+                      <span className="exam-type-badge">
+                        {{
+                          "multiple-choice": "Multiple Choice",
+                          "multiple-response": "Select All",
+                          matching: "Matching",
+                          "fill-in-blank": "Fill in Blank",
+                          hotspot: "Drag to Order",
+                          situational: "Scenario",
+                        }[questionType] || "Multiple Choice"}
+                      </span>
                     </h1>
-                    {showAnswer && selectedOption !== null && (
+                    {showAnswer && getHasAnswer(currentQuestion) && (
                       <span
                         className={
                           isCurrentCorrect
@@ -1181,43 +1384,219 @@ function ExamContent() {
                   <h2 className="exam-question">{cleanUserQuestionText(currentQuestion.question)}</h2>
                 </div>
 
-                <div className="exam-options">
-                  {currentQuestion.options.map((option, index) => {
-                    let buttonStyle = "";
-                    if (selectedOption === index) buttonStyle = "exam-option-selected";
-                    if (showAnswer) {
-                      if (index === currentQuestion.correctAnswer) {
-                        buttonStyle = "exam-option-correct";
-                      } else if (index === selectedOption && index !== currentQuestion.correctAnswer) {
-                        buttonStyle = "exam-option-wrong";
+                {/* Multiple Choice / Situational - radio buttons */}
+                {["multiple-choice", "situational"].includes(questionType) && (
+                  <div className="exam-options">
+                    {currentQuestion.options.map((option, index) => {
+                      let buttonStyle = "";
+                      if (selectedOption === index) buttonStyle = "exam-option-selected";
+                      if (showAnswer) {
+                        if (index === currentQuestion.correctAnswer) {
+                          buttonStyle = "exam-option-correct";
+                        } else if (index === selectedOption && index !== currentQuestion.correctAnswer) {
+                          buttonStyle = "exam-option-wrong";
+                        }
                       }
-                    }
-                    return (
-                      <motion.button
-                        key={option}
-                        type="button"
-                        onClick={() => !showAnswer && handleAnswer(index)}
+                      return (
+                        <motion.button
+                          key={option}
+                          type="button"
+                          onClick={() => !showAnswer && handleAnswer(index)}
+                          disabled={showAnswer}
+                          className={`exam-option ${buttonStyle}`}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.25, delay: 0.05 * index, ease: "easeOut" }}
+                          whileHover={!showAnswer ? { scale: 1.01 } : undefined}
+                          whileTap={!showAnswer ? { scale: 0.98 } : undefined}
+                        >
+                          <div className="exam-option-inner">
+                            <div className="exam-radio">
+                              {selectedOption === index && <div className="exam-radio-dot" />}
+                            </div>
+                            <div className="exam-option-text">
+                              <span className="exam-option-label">{String.fromCharCode(65 + index)}.</span>
+                              {option}
+                            </div>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Multiple Response - checkboxes */}
+                {questionType === "multiple-response" && (
+                  <div className="exam-options">
+                    {currentQuestion.options.map((option, index) => {
+                      const isChecked = (currentQuestion.selectedAnswers ?? []).includes(index);
+                      let buttonStyle = "";
+                      if (isChecked) buttonStyle = "exam-option-selected";
+                      if (showAnswer) {
+                        const correctAnswers = currentQuestion.correctAnswers ?? [];
+                        if (correctAnswers.includes(index)) {
+                          buttonStyle = "exam-option-correct";
+                        } else if (isChecked && !correctAnswers.includes(index)) {
+                          buttonStyle = "exam-option-wrong";
+                        }
+                      }
+                      return (
+                        <motion.button
+                          key={option}
+                          type="button"
+                          onClick={() => {
+                            if (showAnswer) return;
+                            const current = currentQuestion.selectedAnswers ?? [];
+                            const next = current.includes(index)
+                              ? current.filter((i: number) => i !== index)
+                              : [...current, index];
+                            handleMultiResponse(next);
+                          }}
+                          disabled={showAnswer}
+                          className={`exam-option ${buttonStyle}`}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.25, delay: 0.05 * index, ease: "easeOut" }}
+                        >
+                          <div className="exam-option-inner">
+                            <div className="exam-radio exam-radio-checkbox">
+                              {isChecked && <span className="exam-check-mark">✓</span>}
+                            </div>
+                            <div className="exam-option-text">
+                              <span className="exam-option-label">{String.fromCharCode(65 + index)}.</span>
+                              {option}
+                            </div>
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                    <p className="exam-multi-hint">Select all that apply. Toggle each option.</p>
+                  </div>
+                )}
+
+                {/* Fill in the Blank */}
+                {questionType === "fill-in-blank" && (
+                  <div className="exam-blank-area">
+                    <div className="exam-blank-input-wrap">
+                      <span className="exam-blank-label">Answer:</span>
+                      <input
+                        type={currentQuestion.blankType === "number" ? "number" : "text"}
+                        value={currentQuestion.blankAnswer ?? ""}
+                        onChange={(e) => handleFillBlank(e.target.value)}
+                        placeholder={currentQuestion.blankType === "number" ? "Enter a number..." : "Type your answer..."}
+                        className="exam-blank-input"
                         disabled={showAnswer}
-                        className={`exam-option ${buttonStyle}`}
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25, delay: 0.05 * index, ease: "easeOut" }}
-                        whileHover={!showAnswer ? { scale: 1.01 } : undefined}
-                        whileTap={!showAnswer ? { scale: 0.98 } : undefined}
-                      >
-                        <div className="exam-option-inner">
-                          <div className="exam-radio">
-                            {selectedOption === index && <div className="exam-radio-dot" />}
+                        autoFocus
+                      />
+                    </div>
+                    {showAnswer && (
+                      <p className="exam-correct-answer-text">
+                        Correct answer: {currentQuestion.options[currentQuestion.correctAnswer]}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Hotspot / Drag to Order */}
+                {questionType === "hotspot" && currentQuestion.orderItems && (
+                  <div className="exam-hotspot-area">
+                    <p className="exam-hotspot-hint">
+                      Arrange the items in the correct order (click ▲/▼ to move):
+                    </p>
+                    <div className="exam-hotspot-list">
+                      {(currentQuestion.orderedItems ?? currentQuestion.orderItems).map((item: string, index: number) => {
+                        const items = currentQuestion.orderedItems ?? currentQuestion.orderItems ?? [];
+                        const canMoveUp = index > 0 && !showAnswer;
+                        const canMoveDown = index < items.length - 1 && !showAnswer;
+                        return (
+                          <div
+                            key={`${item}-${index}`}
+                            className="exam-hotspot-item"
+                          >
+                            <span className="exam-hotspot-number">{index + 1}</span>
+                            <span className="exam-hotspot-text">{item}</span>
+                            <div className="exam-hotspot-controls">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (!canMoveUp) return;
+                                  const updated = [...items];
+                                  [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+                                  handleOrderChange(updated);
+                                }}
+                                disabled={!canMoveUp}
+                                className={`exam-hotspot-arrow ${canMoveUp ? "exam-hotspot-arrow-active" : ""}`}
+                                aria-label="Move up"
+                              >
+                                ▲
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (!canMoveDown) return;
+                                  const updated = [...items];
+                                  [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+                                  handleOrderChange(updated);
+                                }}
+                                disabled={!canMoveDown}
+                                className={`exam-hotspot-arrow ${canMoveDown ? "exam-hotspot-arrow-active" : ""}`}
+                                aria-label="Move down"
+                              >
+                                ▼
+                              </button>
+                            </div>
+                            <span className="exam-hotspot-grip">⠿</span>
                           </div>
-                          <div className="exam-option-text">
-                            <span className="exam-option-label">{String.fromCharCode(65 + index)}.</span>
-                            {option}
+                        );
+                      })}
+                    </div>
+                    {showAnswer && (
+                      <p className="exam-correct-answer-text">
+                        Correct order: {(currentQuestion.orderItems ?? []).join(" → ")}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Matching */}
+                {questionType === "matching" && currentQuestion.matchItems && (
+                  <div className="exam-match-area">
+                    <div className="exam-match-grid">
+                      <div className="exam-match-label">Item</div>
+                      <div />
+                      <div className="exam-match-label">Match</div>
+                      {currentQuestion.matchItems.map((item, idx) => {
+                        const currentPairs = currentQuestion.matchAnswers ?? [];
+                        const selectedRight = currentPairs.find((p) => p.left === item.left)?.right ?? "";
+                        const rightOptions = [...new Set(currentQuestion.matchItems!.map((i) => i.right))];
+                        return (
+                          <div key={idx} className="exam-match-row">
+                            <span className="exam-match-item">
+                              <span className="exam-match-number">{idx + 1}</span>
+                              {item.left}
+                            </span>
+                            <span className="exam-match-arrow">⟷</span>
+                            <select
+                              value={selectedRight}
+                              onChange={(e) => {
+                                const newPair = { left: item.left, right: e.target.value };
+                                const existing = currentPairs.filter((p) => p.left !== item.left);
+                                handleMatching([...existing, newPair]);
+                              }}
+                              disabled={showAnswer}
+                              className="exam-match-select"
+                            >
+                              <option value="" disabled>Select...</option>
+                              {rightOptions.map((r) => (
+                                <option key={r} value={r}>{r}</option>
+                              ))}
+                            </select>
                           </div>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-                </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {showAnswer && (
                   <motion.div
@@ -1228,27 +1607,31 @@ function ExamContent() {
                   >
                     <div className="exam-explanation-header">
                       <p className="exam-explanation-title">Answer Explanation</p>
-                      <span>Correct answer: {String.fromCharCode(65 + currentQuestion.correctAnswer)}</span>
+                      {["multiple-choice", "situational"].includes(questionType) && (
+                        <span>Correct answer: {String.fromCharCode(65 + currentQuestion.correctAnswer)}</span>
+                      )}
                     </div>
                     <p>{currentQuestion.explanation}</p>
 
-                    <div className="exam-explanation-grid">
-                      <div>
-                        <p className="exam-explanation-subtitle">Elimination Logic</p>
-                        <ul>
-                          {currentQuestion.options.map((option, index) => (
-                            <li key={option}>
-                              <strong>{String.fromCharCode(65 + index)}.</strong>{" "}
-                              {currentQuestion.whyOthersWrong?.[index] ?? getFallbackWhyWrong(currentQuestion, index)}
-                            </li>
-                          ))}
-                        </ul>
+                    {["multiple-choice", "situational"].includes(questionType) && (
+                      <div className="exam-explanation-grid">
+                        <div>
+                          <p className="exam-explanation-subtitle">Elimination Logic</p>
+                          <ul>
+                            {currentQuestion.options.map((option, index) => (
+                              <li key={option}>
+                                <strong>{String.fromCharCode(65 + index)}.</strong>{" "}
+                                {currentQuestion.whyOthersWrong?.[index] ?? getFallbackWhyWrong(currentQuestion, index)}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div className="exam-mindset-tip">
+                          <p className="exam-explanation-subtitle">PMI Mindset Tip</p>
+                          <p>{getMindsetTip(currentQuestion)}</p>
+                        </div>
                       </div>
-                      <div className="exam-mindset-tip">
-                        <p className="exam-explanation-subtitle">PMI Mindset Tip</p>
-                        <p>{getMindsetTip(currentQuestion)}</p>
-                      </div>
-                    </div>
+                    )}
 
                     {!isCurrentCorrect && learningTopic && (
                       <div className="exam-learning-card">
@@ -1278,7 +1661,7 @@ function ExamContent() {
                   <button
                     type="button"
                     onClick={handleNext}
-                    disabled={selectedOption === null || (mode === "practice" && !hasReviewedCurrent)}
+                    disabled={!getHasAnswer(currentQuestion) || (mode === "practice" && !hasReviewedCurrent)}
                     className="exam-button-red"
                   >
                     Next

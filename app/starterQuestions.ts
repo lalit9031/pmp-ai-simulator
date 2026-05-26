@@ -3,7 +3,7 @@
  * Used as initial questions before AI-generated ones load.
  */
 
-import type { CertSlug } from "./certifications";
+import type { CertSlug, QuestionType } from "./certifications";
 
 export type StarterQuestion = {
   question: string;
@@ -12,139 +12,200 @@ export type StarterQuestion = {
   explanation: string;
   domain?: string;
   difficulty?: string;
+  questionType?: QuestionType;
+  /** For matching questions */
+  matchItems?: { left: string; right: string }[];
+  /** For fill-in-blank */
+  blankType?: "number" | "text";
+  /** For drag-to-order */
+  orderItems?: string[];
+  /** For multiple-response questions */
+  correctAnswers?: number[];
 };
 
 export const starterQuestions: Record<string, StarterQuestion[]> = {
   pmp: [
+    // ── People Domain ──
     {
-      question: "A hybrid team is split between frequent backlog changes and fixed compliance deliverables. What should the project manager do first?",
+      question: "Two senior team members disagree on the technical approach for a critical deliverable, causing tension in daily stand-ups. What should the project manager do first?",
       options: [
-        "Escalate the conflict to the sponsor",
-        "Facilitate alignment on delivery approach, constraints, and change handling",
-        "Freeze all backlog changes until compliance work is complete",
-        "Update the charter to require a predictive approach",
+        "Escalate the conflict to the sponsor for resolution",
+        "Facilitate a respectful discussion to understand both perspectives and guide the team toward a decision",
+        "Choose the approach that keeps the project on schedule and assign it",
+        "Ask the two members to resolve it privately without involving the team",
       ],
       correctAnswer: 1,
-      explanation: "The project manager should first create shared understanding and agree on how change will be handled across the hybrid work.",
-      domain: "Hybrid",
+      explanation: "The project manager should facilitate conflict resolution by creating a safe environment for open discussion. PMI's People domain emphasizes leading teams through collaborative conflict management.",
+      domain: "People",
       difficulty: "Medium",
     },
     {
-      question: "A vendor dependency may delay a critical sprint goal. The team is frustrated and the product owner wants an immediate workaround. What should the project manager do?",
+      question: "A new team member is struggling with the agile workflow and their velocity is well below expectations. What should the project manager do?",
       options: [
-        "Ask the team to inspect options, risks, and tradeoffs with the product owner",
-        "Tell the vendor to add resources at no cost",
-        "Remove the affected story from the release plan",
-        "Escalate the issue before discussing it with the team",
+        "Replace the team member with someone more experienced",
+        "Assign a mentor and provide coaching to support performance improvement",
+        "Reduce the team's sprint commitment to accommodate the skill gap",
+        "Document the performance issue in the project records",
       ],
-      correctAnswer: 0,
-      explanation: "PMI mindset favors collaboration and informed decision-making before escalation or unilateral scope changes.",
-      domain: "Risk",
+      correctAnswer: 1,
+      explanation: "Supporting team performance through coaching and mentoring is a core People domain competency. PMI expects the project manager to develop team capabilities before considering replacements.",
+      domain: "People",
+      difficulty: "Easy",
+    },
+    {
+      question: "A stakeholder with strong influence is consistently late providing input on deliverables, which is delaying the team. What is the best approach?",
+      options: [
+        "Proceed without their input and document assumptions",
+        "Escalate the stakeholder's behavior to senior management",
+        "Meet with the stakeholder to understand barriers and agree on a realistic engagement schedule",
+        "Remove the stakeholder from the distribution list",
+      ],
+      correctAnswer: 2,
+      explanation: "Empowering stakeholders through tailored engagement strategies is essential in the People domain. The project manager should first understand the root cause before escalating.",
+      domain: "People",
+      difficulty: "Medium",
+    },
+    // ── Process Domain ──
+    {
+      question: "During a sprint review, stakeholders request significant scope changes that would require reprioritizing the product backlog. The product owner is unsure how to proceed. What should the project manager do?",
+      options: [
+        "Approve the changes to keep stakeholders satisfied",
+        "Advise the product owner to assess the impact on the sprint goal and release timeline before accepting changes",
+        "Request a formal change request from the change control board",
+        "Reject the changes since the sprint is already in progress",
+      ],
+      correctAnswer: 1,
+      explanation: "In agile/hybrid execution, scope is managed through the product owner with backlog reprioritization. The Process domain requires managing changes through the appropriate method based on the delivery approach.",
+      domain: "Process",
       difficulty: "Medium",
     },
     {
-      question: "A stakeholder keeps bypassing the product owner and assigning urgent work directly to developers. What should the project manager do first?",
+      question: "The project budget is trending over allocation due to unforeseen rework in the testing phase. What is the project manager's best first action?",
       options: [
-        "Ask developers to ignore the stakeholder",
-        "Update the communications management plan and reinforce the intake process",
-        "Escalate the behavior to the steering committee",
-        "Add the new work to the sprint backlog immediately",
+        "Reduce team overtime to cut costs",
+        "Analyze the variance, identify root causes, and evaluate corrective options with the team",
+        "Request additional budget from the sponsor immediately",
+        "Freeze all non-essential project activities",
       ],
       correctAnswer: 1,
-      explanation: "The project manager should protect the team and clarify governance while maintaining stakeholder engagement.",
-      domain: "Stakeholder",
-      difficulty: "Easy",
+      explanation: "Budget management in the Process domain starts with analysis. The project manager should understand variance drivers before taking corrective action or requesting changes.",
+      domain: "Process",
+      difficulty: "Hard",
     },
     {
-      question: "During a retrospective, several team members say testing is always rushed near the end of each iteration. What is the best response?",
+      question: "A predictive project phase is complete, but the formal sign-off is delayed because a key approver is unavailable. What should the project manager do?",
       options: [
-        "Ask the quality team to test after the sprint ends",
-        "Increase sprint length without team discussion",
-        "Help the team identify root causes and define improvement actions",
-        "Document the issue as accepted risk",
+        "Proceed to the next phase without sign-off to avoid delays",
+        "Document the situation, escalate through the governance process, and secure alternative approval authority",
+        "Wait indefinitely until the approver becomes available",
+        "Close the phase without approval and treat it as accepted risk",
       ],
-      correctAnswer: 2,
-      explanation: "Retrospectives are used for continuous improvement owned by the team.",
-      domain: "Agile",
-      difficulty: "Easy",
+      correctAnswer: 1,
+      explanation: "Phase gate control is part of process execution. The project manager should follow governance procedures while actively working to resolve the approval bottleneck.",
+      domain: "Process",
+      difficulty: "Hard",
     },
+    // ── Business Environment Domain ──
     {
-      question: "The sponsor asks for a feature that will likely push the release past a regulatory deadline. What is the best next step?",
+      question: "New government regulations are announced that could affect how customer data is handled in the project's final product. What should the project manager do first?",
       options: [
-        "Accept the request because it came from the sponsor",
-        "Reject the request to protect the deadline",
-        "Analyze impact with the team and product owner before deciding",
-        "Move the regulatory work to a later release",
+        "Continue as planned since the regulation is not yet enforced",
+        "Evaluate the regulation's impact on scope, schedule, and compliance requirements with the relevant experts",
+        "Immediately halt all project work until the regulation is clarified",
+        "Assign a compliance officer to monitor future regulatory changes",
       ],
-      correctAnswer: 2,
-      explanation: "Change requests should be assessed for impact before approval or rejection.",
+      correctAnswer: 1,
+      explanation: "The Business Environment domain requires the project manager to assess external impacts on the project. Proactive evaluation before taking action demonstrates strategic alignment.",
       domain: "Business Environment",
       difficulty: "Hard",
     },
     {
-      question: "A team member reports that a senior stakeholder is pressuring them to skip an approval step. What should the project manager do first?",
+      question: "The organization is restructuring, and the project sponsor may be reassigned. This uncertainty is affecting team morale and stakeholder confidence. What should the project manager do?",
       options: [
-        "Privately support the team member and address the governance concern with the stakeholder",
-        "Tell the team member to follow the stakeholder's direction",
-        "Cancel the approval process permanently",
-        "Ignore the issue unless it becomes public",
-      ],
-      correctAnswer: 0,
-      explanation: "The project manager should protect the team and uphold governance with respectful stakeholder engagement.",
-      domain: "Stakeholder",
-      difficulty: "Medium",
-    },
-    {
-      question: "A key stakeholder rejects a delivered increment because it does not match an assumption that was never documented. What should the project manager do?",
-      options: [
-        "Review acceptance criteria and facilitate agreement on the needed change",
-        "Tell the stakeholder the increment must be accepted",
-        "Replace the product owner",
-        "Immediately rework the increment without impact analysis",
-      ],
-      correctAnswer: 0,
-      explanation: "Clarify acceptance criteria and manage the change through the appropriate process.",
-      domain: "Stakeholder",
-      difficulty: "Medium",
-    },
-    {
-      question: "The team discovers an opportunity to automate a manual control, reducing long-term cost but adding short-term work. What should the project manager do?",
-      options: [
-        "Reject it because it was not in the original plan",
-        "Assess benefits, risks, and priority with the product owner and stakeholders",
-        "Approve it immediately because automation is always valuable",
-        "Ask the team to do it without reporting the impact",
+        "Wait for the restructuring to be finalized before taking any action",
+        "Communicate transparently with the team about what is known, maintain focus on delivery, and prepare for sponsor transition",
+        "Ask the departing sponsor to secure a replacement before they leave",
+        "Escalate to the PMO and request project closure",
       ],
       correctAnswer: 1,
-      explanation: "Opportunities should be evaluated and prioritized like other changes.",
-      domain: "Risk",
+      explanation: "Supporting organizational change while maintaining delivery momentum is a key Business Environment competency. Transparency and continuity planning are preferred over reactive shutdown.",
+      domain: "Business Environment",
       difficulty: "Medium",
     },
     {
-      question: "A lessons learned item from a previous project is relevant, but the team has not reviewed it. What should the project manager do?",
+      question: "An external audit finds that the project's procurement process does not meet the organization's new sustainability standards. What should the project manager do?",
       options: [
-        "Share relevant lessons and discuss how they affect current planning",
-        "Wait until project closure",
-        "Assume the team already knows",
-        "File the lessons in the repository only",
-      ],
-      correctAnswer: 0,
-      explanation: "Lessons learned should be used throughout the project, not only at the end.",
-      domain: "Agile",
-      difficulty: "Easy",
-    },
-    {
-      question: "A customer requests daily status meetings because they do not trust the team's progress. What should the project manager do?",
-      options: [
-        "Decline the request without discussion",
-        "Invite the customer to sprint reviews and agree on transparent reporting",
-        "Ask the team to prepare detailed daily slide decks",
-        "Escalate the trust issue to procurement",
+        "Complete current procurement under old standards and update for future purchases",
+        "Review the findings, update procurement procedures to align with standards, and communicate the change to the team and vendors",
+        "Argue that the audit standards were not part of the original project scope",
+        "Request a waiver from the audit committee for this project",
       ],
       correctAnswer: 1,
-      explanation: "Transparency and appropriate ceremonies can address trust without creating unnecessary overhead.",
-      domain: "Agile",
+      explanation: "The Business Environment domain includes strategic alignment with organizational policies and external standards. Compliance must be addressed proactively.",
+      domain: "Business Environment",
+      difficulty: "Medium",
+    },
+    // ── Multiple Response (Select All That Apply) ──
+    {
+      question: "A project manager discovers that the project's risk register has not been updated in three months, and several identified risks have changed significantly. Which actions should the project manager take? (Select all that apply)",
+      options: [
+        "Schedule a risk review workshop with the team and key stakeholders",
+        "Update risk probability and impact assessments based on current information",
+        "Delete risks that have not occurred yet to simplify the register",
+        "Reassign risk owners as needed and validate response strategies",
+        "Remove all low-priority risks to focus on high-priority items only",
+      ],
+      correctAnswer: 0,
+      correctAnswers: [0, 1, 3],
+      explanation: "Risk management is a continuous process. The project manager should review, reassess, reassign, and update risks with the team. Deleting or removing risks without proper evaluation violates PMI's risk management principles.",
+      domain: "Process",
+      difficulty: "Hard",
+      questionType: "multiple-response",
+    },
+    {
+      question: "The project is entering its closing phase. Which of the following activities must the project manager complete? (Select all that apply)",
+      options: [
+        "Obtain formal acceptance of deliverables from the customer",
+        "Release project resources and document lessons learned",
+        "Begin a new project charter for the next phase",
+        "Close all procurement contracts and settle outstanding claims",
+        "Update the business case with final project costs",
+      ],
+      correctAnswer: 1,
+      correctAnswers: [0, 1, 3],
+      explanation: "Project closure requires formal acceptance, resource release, lessons learned documentation, and contract closure. Starting a new charter and updating the business case are not standard closure activities.",
+      domain: "Process",
       difficulty: "Easy",
+      questionType: "multiple-response",
+    },
+    // ── Situational (Scenario) ──
+    {
+      question: "A virtual team spanning four time zones is struggling with collaboration. Communication is fragmented and decisions are slow because team members rely mostly on email. What should the project manager do first?",
+      options: [
+        "Implement a daily video stand-up at a rotating time to include all time zones",
+        "Ask each team member to send a detailed status email every morning",
+        "Require all team members to relocate to the same office",
+        "Reduce the team's deliverables until collaboration improves",
+      ],
+      correctAnswer: 0,
+      explanation: "The situational question tests the project manager's ability to choose the most practical first step. A rotating daily stand-up increases synchronous collaboration without forcing relocation or reducing output.",
+      domain: "People",
+      difficulty: "Easy",
+      questionType: "situational",
+    },
+    {
+      question: "A critical vendor notifies the project manager that a key component will be delayed by two weeks due to supply chain issues. The delay will push the project past the contractual deadline. What is the project manager's best next step?",
+      options: [
+        "Accept the delay and update the project schedule",
+        "Analyze the impact on the critical path and evaluate mitigation options such as fast-tracking or crashing",
+        "Immediately switch to a different vendor",
+        "Notify the customer about the delay without further analysis",
+      ],
+      correctAnswer: 1,
+      explanation: "Before communicating delays externally or making drastic decisions, the project manager should analyze schedule impact and explore mitigation strategies. This reflects the Process domain's emphasis on data-driven decision-making.",
+      domain: "Process",
+      difficulty: "Medium",
+      questionType: "situational",
     },
   ],
   "pmi-acp": [
