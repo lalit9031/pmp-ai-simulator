@@ -19,8 +19,8 @@ import { getPricingInfo, isIndia } from "../lib/pricing";
 import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { isAdminEmail } from "../lib/admin";
 
-const planStorageKey = "pmp-simulator-plan-v1";
-const userStorageKey = "pmp-simulator-user-v1";
+const planStorageKey = "exampro-plan-v1";
+const userStorageKey = "exampro-user-v1";
 
 type PaymentMethod = "upi" | "credit-card" | "debit-card";
 
@@ -109,7 +109,7 @@ function CheckoutInner() {
         if (prev <= 1) {
           clearInterval(timer);
           window.localStorage.setItem(planStorageKey, plan);
-          window.localStorage.removeItem("pmp-simulator-progress-v1");
+          window.localStorage.removeItem("exampro-progress-v1");
           router.push("/payment/success?plan=" + encodeURIComponent(plan));
           return 0;
         }
@@ -531,7 +531,7 @@ function CheckoutInner() {
               <p className="checkout-benefits-title">What you get:</p>
               <ul className="checkout-benefits-list">
                 <li>
-                  <FaCheck /> Live AI-generated PMP questions
+                  <FaCheck /> Live AI-generated practice questions
                 </li>
                 <li>
                   <FaCheck /> All learning topics unlocked

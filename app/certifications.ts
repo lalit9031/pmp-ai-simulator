@@ -212,5 +212,5 @@ export function isPaidCertSlug(slug: string): boolean {
 
 /** Map cert slug to storage key prefix */
 export function certStorageKey(key: string, certSlug: CertSlug = "pmp"): string {
-  return `pmp-simulator-${certifications[certSlug].storagePrefix}-${key}`;
+  return `exampro-${certifications[certSlug].storagePrefix}-${key}`;
 }

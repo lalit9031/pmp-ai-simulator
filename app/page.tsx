@@ -35,8 +35,8 @@ import {
   ScaleOnHover,
 } from "./components/Animations";
 
-const userStorageKey = "pmp-simulator-user-v1";
-const planStorageKey = "pmp-simulator-plan-v1";
+const userStorageKey = "exampro-user-v1";
+const planStorageKey = "exampro-plan-v1";
 
 function isPaidPlan(plan: string | null) {
   return plan === "founder" || plan === "annual" || plan === "global";

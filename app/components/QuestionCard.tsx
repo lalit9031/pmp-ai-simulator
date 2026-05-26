@@ -72,7 +72,7 @@ export default function QuestionCard({
         </div>
 
         <span className="w-fit rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">
-          PMP Practice
+          ExamPro Practice
         </span>
       </div>
 

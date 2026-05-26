@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PMP Simulator",
-  description: "Timed PMP exam simulator with AI-generated practice questions.",
+  title: "ExamPro",
+  description: "Timed exam simulator with AI-generated practice questions for PMP, PMI-ACP, CAPM, CSM, PSM I, and Six Sigma certifications.",
 };
 
 export default function RootLayout({

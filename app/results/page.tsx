@@ -46,13 +46,13 @@ type WeakAreaStats = Record<
   { domain: string; topic: string; attempts: number; correct: number; mistakes: number }
 >;
 
-const planStorageKey = "pmp-simulator-plan-v1";
+const planStorageKey = "exampro-plan-v1";
 
 function resultsStorageKey(certSlug: string) {
-  return `pmp-${certSlug}-latest-results-v1`;
+  return `exampro-${certSlug}-latest-results-v1`;
 }
 function weakAreaStorageKey(certSlug: string) {
-  return `pmp-${certSlug}-weak-area-stats-v1`;
+  return `exampro-${certSlug}-weak-area-stats-v1`;
 }
 
 function getQuestionDomain(question: ResultQuestion) {

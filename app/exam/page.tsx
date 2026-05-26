@@ -62,15 +62,15 @@ const palettePageSize = 60;
 const liveStoredStarterCount = 25;
 const firstApiTriggerAnswerCount = 10;
 const desiredBufferAhead = 25;
-const planStorageKey = "pmp-simulator-plan-v1";
-const userStorageKey = "pmp-simulator-user-v1";
+const planStorageKey = "exampro-plan-v1";
+const userStorageKey = "exampro-user-v1";
 const freeTopicQuestionCount = 150;
 
-const progressStorageKey = (s: string) => `pmp-${s}-progress-v1`;
-const resultsStorageKey = (s: string) => `pmp-${s}-latest-results-v1`;
-const mistakeNotebookStorageKey = (s: string) => `pmp-${s}-mistake-notebook-v1`;
-const weakAreaStorageKey = (s: string) => `pmp-${s}-weak-area-stats-v1`;
-const attemptHistoryStorageKey = "pmp-attempt-history-v1";
+const progressStorageKey = (s: string) => `exampro-${s}-progress-v1`;
+const resultsStorageKey = (s: string) => `exampro-${s}-latest-results-v1`;
+const mistakeNotebookStorageKey = (s: string) => `exampro-${s}-mistake-notebook-v1`;
+const weakAreaStorageKey = (s: string) => `exampro-${s}-weak-area-stats-v1`;
+const attemptHistoryStorageKey = "exampro-attempt-history-v1";
 
 function getFreeTopicSlugs(certSlug: string): string[] {
   const cert = getCertification(certSlug);

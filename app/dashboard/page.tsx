@@ -65,21 +65,21 @@ type StreakStats = {
   activeDays: number;
 };
 
-const userStorageKey = "pmp-simulator-user-v1";
-const planStorageKey = "pmp-simulator-plan-v1";
-const attemptHistoryStorageKey = "pmp-attempt-history-v1";
+const userStorageKey = "exampro-user-v1";
+const planStorageKey = "exampro-plan-v1";
+const attemptHistoryStorageKey = "exampro-attempt-history-v1";
 
 function progressStorageKey(slug: string) {
-  return `pmp-${slug}-progress-v1`;
+  return `exampro-${slug}-progress-v1`;
 }
 function resultsStorageKey(slug: string) {
-  return `pmp-${slug}-latest-results-v1`;
+  return `exampro-${slug}-latest-results-v1`;
 }
 function weakAreaStorageKey(slug: string) {
-  return `pmp-${slug}-weak-area-stats-v1`;
+  return `exampro-${slug}-weak-area-stats-v1`;
 }
 function mistakeNotebookStorageKey(slug: string) {
-  return `pmp-${slug}-mistake-notebook-v1`;
+  return `exampro-${slug}-mistake-notebook-v1`;
 }
 
 function emptyCertProgress(cert: Certification): CertProgress {
@@ -685,7 +685,7 @@ export default function DashboardPage() {
         {/* Quick actions */}
         <div className="intro-actions" style={{ marginTop: 24 }}>
           <Link href="/exam?plan=free&fresh=1" className="intro-primary-action">
-            Start PMP Practice
+            Start Practice
           </Link>
           <Link href="/pricing" className="intro-secondary-action">
             View Pricing

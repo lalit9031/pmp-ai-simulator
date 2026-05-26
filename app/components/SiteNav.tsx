@@ -9,7 +9,7 @@ import { useTheme } from "../lib/ThemeProvider";
 import { isAdminEmail } from "../lib/admin";
 import { certifications } from "../certifications";
 
-const userStorageKey = "pmp-simulator-user-v1";
+const userStorageKey = "exampro-user-v1";
 
 type SiteUser = {
   name?: string;
@@ -77,7 +77,7 @@ export default function SiteNav() {
   const handleLogout = async () => {
     setUser(null);
     window.localStorage.removeItem(userStorageKey);
-    window.localStorage.removeItem("pmp-simulator-plan-v1");
+    window.localStorage.removeItem("exampro-plan-v1");
 
     const supabase = getSupabaseBrowserClient();
     if (supabase) {
@@ -111,7 +111,7 @@ export default function SiteNav() {
   return (
     <nav className="intro-nav site-nav" aria-label="Primary navigation">
       <Link href="/" className="intro-brand" onClick={closeMenu}>
-        PMP Simulator
+        ExamPro
       </Link>
 
       {/* Hamburger toggle — visible on mobile */}

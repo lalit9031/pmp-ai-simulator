@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getSupabaseBrowserClient } from "../../lib/supabaseClient";
 
-const userStorageKey = "pmp-simulator-user-v1";
+const userStorageKey = "exampro-user-v1";
 
 export default function AuthCallbackPage() {
   const [message, setMessage] = useState("Finishing sign in...");
@@ -85,7 +85,7 @@ export default function AuthCallbackPage() {
             user.user_metadata?.full_name ??
             user.user_metadata?.name ??
             user.email?.split("@")[0] ??
-            "PMP Learner",
+            "ExamPro Learner",
           email: user.email ?? "",
           avatar_url: user.user_metadata?.avatar_url ?? null,
           provider: user.app_metadata?.provider ?? "supabase",
@@ -134,7 +134,7 @@ export default function AuthCallbackPage() {
         <h1>{message}</h1>
         {errorDetail && <p className="auth-error-note">{errorDetail}</p>}
         {!errorDetail && (
-          <p>This page connects your Google account to your PMP account.</p>
+          <p>This page connects your Google account to your ExamPro account.</p>
         )}
         <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
           <Link href="/login" className="intro-secondary-action">

@@ -11,7 +11,7 @@ import {
   type CertSlug,
 } from "../certifications";
 
-const planStorageKey = "pmp-simulator-plan-v1";
+const planStorageKey = "exampro-plan-v1";
 
 function isPaidPlanActive() {
   const plan = window.localStorage.getItem(planStorageKey);

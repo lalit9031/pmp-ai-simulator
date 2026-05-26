@@ -10,7 +10,7 @@ import {
 
 type Theme = "light" | "dark";
 
-const themeStorageKey = "pmp-simulator-theme-v1";
+const themeStorageKey = "exampro-theme-v1";
 
 type ThemeContextValue = {
   theme: Theme;

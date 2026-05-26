@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { LearningTopic } from "../../learningTopics";
 import { certifications } from "../../certifications";
 
-const planStorageKey = "pmp-simulator-plan-v1";
+const planStorageKey = "exampro-plan-v1";
 
 // Collect free topic slugs from all certifications
 const freeTopicSlugs = Object.values(certifications).flatMap((c) => c.freeTopicSlugs);

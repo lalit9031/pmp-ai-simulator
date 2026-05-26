@@ -9,7 +9,7 @@ import {
   isSupabaseConfigured,
 } from "../lib/supabaseClient";
 
-const userStorageKey = "pmp-simulator-user-v1";
+const userStorageKey = "exampro-user-v1";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -61,7 +61,7 @@ export default function LoginPage() {
           email: email.trim(),
           options: {
             data: {
-              full_name: name.trim() || "PMP Learner",
+              full_name: name.trim() || "ExamPro Learner",
             },
             emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
               nextPath,
@@ -81,7 +81,7 @@ export default function LoginPage() {
     }
 
     saveUser({
-      name: name.trim() || "PMP Learner",
+      name: name.trim() || "ExamPro Learner",
       email: email.trim(),
       provider: "email",
     });
@@ -122,7 +122,7 @@ export default function LoginPage() {
     <main className="auth-page">
       <section className="auth-shell">
         <Link href="/" className="learn-back-link">
-          PMP Simulator
+          ExamPro
         </Link>
 
         <div className="auth-grid">
@@ -130,16 +130,16 @@ export default function LoginPage() {
             <p className="intro-eyebrow">Member Access</p>
             <h1>Login to save progress and unlock paid practice.</h1>
             <p>
-              Sign in or sign up to start the free PMP plan, keep exam
+              Sign in or sign up to start the free plan, keep exam
               progress, review results, and upgrade when you want the live
               simulator.
             </p>
 
             <div className="auth-benefits">
               <span>Saved results</span>
-              <span>4 free PMP topics</span>
+              <span>4 free topics</span>
               <span>Learning recommendations</span>
-              <span>Paid AI PMP tests</span>
+              <span>Paid AI tests</span>
               <span>Expanded topic updates</span>
             </div>
           </div>

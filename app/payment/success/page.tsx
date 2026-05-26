@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { FaCheckCircle, FaRocket, FaBookOpen } from "react-icons/fa";
 
-const planStorageKey = "pmp-simulator-plan-v1";
+const planStorageKey = "exampro-plan-v1";
 
 function SuccessInner() {
   const router = useRouter();
@@ -47,7 +47,7 @@ function SuccessInner() {
 
         <p>
           Your <strong>{planLabel} Plan</strong> is now active. You have
-          full access to live AI-generated PMP questions, all learning
+          full access to live AI-generated practice questions, all learning
           topics, and the complete exam simulation for one year.
         </p>
 

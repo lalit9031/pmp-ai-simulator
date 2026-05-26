@@ -55,7 +55,7 @@ export default function CountdownTimer({
           }`}
           aria-hidden="true"
         >
-          PMP
+          ExamPro
         </div>
       </div>
     </section>

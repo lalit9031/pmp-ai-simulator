@@ -9,9 +9,9 @@ import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { isAdminEmail } from "../lib/admin";
 import { certifications, type CertSlug } from "../certifications";
 
-const planStorageKey = "pmp-simulator-plan-v1";
-const paidUsersStorageKey = "pmp-simulator-paid-users-v1";
-const userStorageKey = "pmp-simulator-user-v1";
+const planStorageKey = "exampro-plan-v1";
+const paidUsersStorageKey = "exampro-paid-users-v1";
+const userStorageKey = "exampro-user-v1";
 
 const paidFeatures = [
   "Live AI-powered practice tests across 5 certifications",
@@ -101,7 +101,7 @@ function PricingContent() {
       }).catch(() => {});
 
       setActivePlan(plan);
-      window.localStorage.removeItem("pmp-simulator-pmp-progress-v1");
+      window.localStorage.removeItem("exampro-pmp-progress-v1");
       router.push("/exam?plan=live&fresh=1");
       return;
     }

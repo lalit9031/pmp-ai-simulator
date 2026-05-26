@@ -9,7 +9,7 @@ import type { ProfileRecord } from "../api/profiles/route";
 import { isAdminEmail } from "../lib/admin";
 import { showToast } from "../components/Toast";
 
-const userStorageKey = "pmp-simulator-user-v1";
+const userStorageKey = "exampro-user-v1";
 
 type AdminTab = "users" | "paid-signups" | "paid-users";
 
