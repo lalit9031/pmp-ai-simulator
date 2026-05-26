@@ -15,6 +15,18 @@ import {
   getLearningCertifications,
   type CertSlug,
 } from "./certifications";
+
+// Map hex color to CSS RGB string for the --cert-color-rgb variable
+function cssRgbFromHex(hex: string): string {
+  const c = hex.replace("#", "");
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  return Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)
+    ? "99, 102, 241"
+    : `${r}, ${g}, ${b}`;
+}
+
 import {
   FadeIn,
   SlideUp,
@@ -176,21 +188,31 @@ export default function IntroPage() {
             <Link
               href={`/exam?cert=${cert.slug}&plan=free&fresh=1`}
               className="intro-cert-card"
-              style={{ color: cert.color }}
+              style={{
+                '--cert-color': cert.color,
+                '--cert-color-rgb': cssRgbFromHex(cert.color),
+              } as React.CSSProperties}
             >
+              <div className="intro-cert-card-bg-pattern" />
               <div className="intro-cert-card-top">
                 <span className="intro-cert-card-icon">{cert.icon}</span>
                 <span className={`intro-cert-card-type ${cert.type === "learning" ? "intro-cert-type-learning" : ""}`}>
                   {cert.type === "exam" ? "Exam" : "Learning"}
                 </span>
               </div>
-              <h3>{cert.shortName}</h3>
-              <p>{cert.description}</p>
+              <h3>{cert.title}</h3>
+              <p className="intro-cert-card-desc">{cert.description}</p>
               <div className="intro-cert-card-meta">
                 {cert.type === "exam" && (
                   <>
-                    <span>{cert.totalQuestions} questions</span>
-                    <span>{cert.timeLimitMinutes} min</span>
+                    <span>
+                      <FaRegFileAlt aria-hidden="true" />
+                      {cert.totalQuestions} questions
+                    </span>
+                    <span>
+                      <FaClock aria-hidden="true" />
+                      {cert.timeLimitMinutes} min
+                    </span>
                   </>
                 )}
               </div>
@@ -198,7 +220,7 @@ export default function IntroPage() {
                 <span>
                   {cert.type === "exam" ? "Start Practice" : "Start Learning"}
                 </span>
-                <FaArrowRight aria-hidden="true" />
+                <FaArrowRight aria-hidden="true" className="intro-cert-card-arrow" />
               </div>
             </Link>
             </StaggerItem>
