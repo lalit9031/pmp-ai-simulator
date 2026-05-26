@@ -15,6 +15,13 @@ import {
   getLearningCertifications,
   type CertSlug,
 } from "./certifications";
+import {
+  FadeIn,
+  SlideUp,
+  StaggerContainer,
+  StaggerItem,
+  ScaleOnHover,
+} from "./components/Animations";
 
 const userStorageKey = "pmp-simulator-user-v1";
 const planStorageKey = "pmp-simulator-plan-v1";
@@ -50,6 +57,7 @@ export default function IntroPage() {
   return (
     <main className="intro-page">
       <section className="intro-hero">
+        <FadeIn>
         <div className="intro-copy">
           <p className="intro-eyebrow">Multi-Certification Practice Environment</p>
           <h1>Exam Simulator</h1>
@@ -59,16 +67,22 @@ export default function IntroPage() {
             when you are ready for the full version.
           </p>
           <div className="intro-actions">
+            <ScaleOnHover>
             <Link href={startExamHref} className="intro-primary-action">
               Start PMP Exam
               <FaArrowRight aria-hidden="true" />
             </Link>
+            </ScaleOnHover>
+            <ScaleOnHover>
             <Link href="/pricing" className="intro-secondary-action">
               View Plans
             </Link>
+            </ScaleOnHover>
           </div>
         </div>
+        </FadeIn>
 
+        <SlideUp delay={0.15}>
         <div className="intro-panel" aria-label="Available certifications preview">
           <div className="intro-panel-header">
             <span>Available Certs</span>
@@ -93,10 +107,12 @@ export default function IntroPage() {
             <span>{learningCerts.length} learning-only</span>
           </div>
         </div>
+        </SlideUp>
       </section>
 
       {/* Certification cards */}
       <section className="intro-certs" aria-label="Certifications">
+        <FadeIn>
         <div className="intro-certs-header">
           <p className="intro-eyebrow">Certifications</p>
           <h2>Choose your certification path</h2>
@@ -105,11 +121,12 @@ export default function IntroPage() {
             simulations, and personalized learning recommendations.
           </p>
         </div>
+        </FadeIn>
 
-        <div className="intro-certs-grid">
+        <StaggerContainer className="intro-certs-grid">
           {allCerts.map((cert) => (
+            <StaggerItem key={cert.slug}>
             <Link
-              key={cert.slug}
               href={`/exam?cert=${cert.slug}&plan=free&fresh=1`}
               className="intro-cert-card"
               style={{ borderTopColor: cert.color }}
@@ -137,11 +154,13 @@ export default function IntroPage() {
                 <FaArrowRight aria-hidden="true" />
               </div>
             </Link>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </section>
 
-      <section className="intro-routes" aria-label="Application routes">
+      <StaggerContainer className="intro-routes" aria-label="Application routes">
+        <StaggerItem>
         <Link href="/results" className="intro-route-card">
           <div className="intro-route-icon">
             <FaClock aria-hidden="true" />
@@ -154,6 +173,8 @@ export default function IntroPage() {
             <p>Review score, domain performance, and answer history.</p>
           </div>
         </Link>
+        </StaggerItem>
+        <StaggerItem>
         <Link href="/learn" className="intro-route-card">
           <div className="intro-route-icon">
             <FaBookOpen aria-hidden="true" />
@@ -166,6 +187,8 @@ export default function IntroPage() {
             <p>Study targeted topics after missed questions.</p>
           </div>
         </Link>
+        </StaggerItem>
+        <StaggerItem>
         <Link href="/dashboard" className="intro-route-card">
           <div className="intro-route-icon">
             <FaChartLine aria-hidden="true" />
@@ -178,10 +201,13 @@ export default function IntroPage() {
             <p>Track readiness trends and focus areas over time.</p>
           </div>
         </Link>
-      </section>
+        </StaggerItem>
+      </StaggerContainer>
 
       {isSignedIn && !hasPaidPlan && (
+        <FadeIn>
         <section className="intro-benefits" aria-label="Paid plan benefits">
+          <SlideUp>
           <div className="intro-benefits-header">
             <p className="intro-eyebrow">Unlock Full Access</p>
             <h2>Why go paid?</h2>
@@ -190,7 +216,9 @@ export default function IntroPage() {
               all certifications, unlimited topics, and detailed analytics.
             </p>
           </div>
-          <div className="intro-benefits-grid">
+          </SlideUp>
+          <StaggerContainer className="intro-benefits-grid">
+            <StaggerItem>
             <div className="intro-benefit-card intro-benefit-featured">
               <span className="intro-benefit-icon">🤖</span>
               <h3>AI-Powered Questions</h3>
@@ -199,6 +227,8 @@ export default function IntroPage() {
                 updated with latest trends including ESG and business value.
               </p>
             </div>
+            </StaggerItem>
+            <StaggerItem>
             <div className="intro-benefit-card">
               <span className="intro-benefit-icon">📚</span>
               <h3>All Certifications</h3>
@@ -207,6 +237,8 @@ export default function IntroPage() {
                 Not just 4 topics — unlock everything.
               </p>
             </div>
+            </StaggerItem>
+            <StaggerItem>
             <div className="intro-benefit-card">
               <span className="intro-benefit-icon">📊</span>
               <h3>Advanced Analytics</h3>
@@ -215,6 +247,8 @@ export default function IntroPage() {
                 get personalized learning recommendations.
               </p>
             </div>
+            </StaggerItem>
+            <StaggerItem>
             <div className="intro-benefit-card">
               <span className="intro-benefit-icon">🏆</span>
               <h3>Live Exam Simulator</h3>
@@ -223,7 +257,8 @@ export default function IntroPage() {
                 questions, just like the actual certification tests.
               </p>
             </div>
-          </div>
+            </StaggerItem>
+          </StaggerContainer>
           <div className="intro-benefits-actions">
             <Link href="/pricing" className="intro-primary-action">
               View Plans &amp; Pricing
@@ -233,6 +268,7 @@ export default function IntroPage() {
             </Link>
           </div>
         </section>
+        </FadeIn>
       )}
     </main>
   );

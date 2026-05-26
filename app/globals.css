@@ -2213,9 +2213,8 @@ body {
 
 .results-score-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 18px;
 }
 
 .results-score-grid > div,
@@ -2239,6 +2238,91 @@ body {
   color: #111827;
   font-size: 28px;
   font-weight: 900;
+}
+
+/* ── Enhanced results page animations ── */
+.results-score-area {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.results-score-ring-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.results-score-card {
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  background: var(--subtle-bg);
+  padding: 16px;
+  text-align: center;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.results-score-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--card-shadow);
+}
+
+.results-score-card p {
+  margin-bottom: 6px;
+  color: var(--muted-text);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.results-panel-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.results-panel-row:last-child {
+  border-bottom: none;
+}
+
+.results-panel-row span {
+  color: var(--page-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.results-panel-row strong {
+  font-size: 14px;
+  font-weight: 900;
+  text-align: right;
+}
+
+/* Animated domain row hover effect */
+.results-domain-row {
+  transition: transform 180ms ease, background-color 180ms ease;
+  cursor: default;
+}
+
+.results-domain-row:hover {
+  background: var(--hover-bg);
+  border-radius: 6px;
+}
+
+@media (max-width: 600px) {
+  .results-score-area {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .results-score-ring-wrap {
+    margin-bottom: 8px;
+  }
 }
 
 .results-panels {
@@ -2614,6 +2698,385 @@ body {
   border-color: #7f1d1d;
   background: #450a0a;
   color: #fca5a5;
+}
+
+/* ── Timer bar for exam mode ── */
+.exam-timer-track {
+  height: 4px;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-border);
+}
+
+.exam-timer-track span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1s linear, background 0.3s ease;
+}
+
+/* ── Skeleton loaders ── */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton-pulse {
+  background: linear-gradient(90deg, var(--surface-border) 25%, var(--hover-bg) 37%, var(--surface-border) 63%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-card,
+.skeleton-exam {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  background: var(--card-bg);
+}
+
+.skeleton-exam {
+  padding: 28px;
+  margin-top: 20px;
+}
+
+/* ── Micro-interactions ── */
+
+/* Press effect on buttons */
+.intro-primary-action:active:not(:disabled),
+.intro-secondary-action:active:not(:disabled),
+.exam-button-red:active:not(:disabled),
+.exam-button-secondary:active:not(:disabled),
+.auth-google-button:active:not(:disabled) {
+  transform: scale(0.97);
+  transition: transform 60ms ease;
+}
+
+/* Enhanced button transitions */
+.intro-primary-action,
+.intro-secondary-action,
+.exam-button-red,
+.exam-button-secondary,
+.auth-google-button {
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+  will-change: transform;
+}
+
+/* Card entrance animation via CSS (fallback when framer-motion not present) */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.35s ease-out both;
+}
+
+/* Stagger animation delays */
+.stagger-delay-1 { animation-delay: 40ms; }
+.stagger-delay-2 { animation-delay: 80ms; }
+.stagger-delay-3 { animation-delay: 120ms; }
+.stagger-delay-4 { animation-delay: 160ms; }
+.stagger-delay-5 { animation-delay: 200ms; }
+.stagger-delay-6 { animation-delay: 240ms; }
+
+/* Enhanced focus rings */
+:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* Improved button press for exam options */
+.exam-option:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.exam-option {
+  transition: transform 120ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  will-change: transform;
+}
+
+/* Smooth number transitions in question navigator */
+.exam-number {
+  transition: transform 120ms ease, background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.exam-number:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+/* Hover lift effect for cert cards on homepage */
+.intro-cert-card {
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.intro-cert-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Dashboard card hover */
+.dash-overall-card {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.dash-overall-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--card-shadow);
+}
+
+/* Dashboard stat emphasis on hover */
+.dash-cert-stat {
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.dash-cert-stat:hover {
+  transform: translateY(-1px);
+  background: var(--hover-bg);
+}
+
+/* Palette button transition */
+.exam-palette-controls button {
+  transition: transform 120ms ease, border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.exam-palette-controls button:active:not(.exam-segment-active) {
+  transform: scale(0.95);
+}
+
+/* Keyboard shortcut hint badge */
+.kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid var(--surface-border);
+  border-radius: 4px;
+  background: var(--subtle-bg);
+  color: var(--muted-text);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  margin-left: 6px;
+}
+
+/* Toast enter animation (CSS enhancement) */
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+/* Score percentage color transition */
+.dash-history-pct {
+  transition: color 200ms ease;
+}
+
+/* ── Keyboard Shortcut Help Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(4px);
+  padding: 20px;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 480px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 25%);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: var(--page-text);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.modal-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  background: var(--surface-bg);
+  color: var(--muted-text);
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 0;
+  line-height: 1;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+}
+
+.modal-close-btn:hover {
+  border-color: var(--hover-border);
+  color: var(--page-text);
+  background: var(--hover-bg);
+}
+
+.modal-shortcuts-grid {
+  display: grid;
+  padding: 8px 0;
+}
+
+.modal-shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 22px;
+  transition: background-color 120ms ease;
+}
+
+.modal-shortcut-row:hover {
+  background: var(--hover-bg);
+}
+
+.modal-shortcut-keys {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 4px;
+  min-width: 100px;
+}
+
+.modal-shortcut-keys kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--surface-border);
+  border-radius: 5px;
+  background: var(--subtle-bg);
+  color: var(--page-text);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+}
+
+.modal-shortcut-desc {
+  color: var(--page-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.modal-shortcut-mode {
+  color: var(--muted-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.modal-shortcuts-note {
+  padding: 12px 22px 16px;
+  border-top: 1px solid var(--surface-border);
+  color: var(--muted-text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Help button in exam review row */
+.exam-help-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  background: var(--surface-bg);
+  color: var(--muted-text);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 8px 12px;
+  margin-left: auto;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+}
+
+.exam-help-btn:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  background: var(--accent-blue-bg);
+}
+
+.exam-help-btn .kbd-hint {
+  margin-left: 0;
+  font-size: 11px;
+}
+
+[data-theme="dark"] .modal-content {
+  border-color: #334155;
+}
+
+[data-theme="dark"] .modal-shortcut-keys kbd {
+  border-color: #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
 }
 
 /* ── Toast notifications ── */

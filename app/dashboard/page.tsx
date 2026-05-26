@@ -4,6 +4,13 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "../lib/supabaseClient";
 import { getExamCertifications, type Certification } from "../certifications";
+import {
+  FadeIn,
+  SlideUp,
+  StaggerContainer,
+  StaggerItem,
+  AnimatedCounter,
+} from "../components/Animations";
 
 // ── Types ──
 
@@ -396,6 +403,7 @@ export default function DashboardPage() {
   return (
     <main className="coming-page">
       <section className="coming-shell dashboard-shell">
+        <FadeIn>
         <p className="intro-eyebrow">Dashboard</p>
         <h1>{profile?.name ?? "Your Certifications Dashboard"}</h1>
         <p>
@@ -403,28 +411,43 @@ export default function DashboardPage() {
             ? `${profile.email} · ${profile.plan ?? "free"} plan`
             : status}
         </p>
+        </FadeIn>
 
         {/* Overall Stats */}
-        <div className="dash-overall-grid">
+        <StaggerContainer className="dash-overall-grid">
+          <StaggerItem>
           <div className="dash-overall-card">
             <p className="dash-overall-label">Certs Practiced</p>
             <strong className="dash-overall-value">
-              {overall.certsWithActivity}/{examCerts.length}
+              <AnimatedCounter value={overall.certsWithActivity} />/{examCerts.length}
             </strong>
           </div>
+          </StaggerItem>
+          <StaggerItem>
           <div className="dash-overall-card">
             <p className="dash-overall-label">Questions Answered</p>
-            <strong className="dash-overall-value">{overall.totalAnswered}</strong>
+            <strong className="dash-overall-value">
+              <AnimatedCounter value={overall.totalAnswered} />
+            </strong>
           </div>
+          </StaggerItem>
+          <StaggerItem>
           <div className="dash-overall-card">
             <p className="dash-overall-label">Mistakes Logged</p>
-            <strong className="dash-overall-value">{overall.totalMistakes}</strong>
+            <strong className="dash-overall-value">
+              <AnimatedCounter value={overall.totalMistakes} />
+            </strong>
           </div>
+          </StaggerItem>
+          <StaggerItem>
           <div className="dash-overall-card">
             <p className="dash-overall-label">Weak Areas Tracked</p>
-            <strong className="dash-overall-value">{overall.totalWeakAreas}</strong>
+            <strong className="dash-overall-value">
+              <AnimatedCounter value={overall.totalWeakAreas} />
+            </strong>
           </div>
-        </div>
+          </StaggerItem>
+        </StaggerContainer>
 
         <div className="dash-insights-grid">
           <section className="dash-trends-card">
@@ -483,16 +506,16 @@ export default function DashboardPage() {
             <p className="dash-kicker">Consistency</p>
             <h2 className="dash-section-title">Study Streak</h2>
             <div className="dash-current-streak">
-              <strong>{streak.current}</strong>
+              <strong><AnimatedCounter value={streak.current} /></strong>
               <span>{streak.current === 1 ? "day" : "days"} active</span>
             </div>
             <div className="dash-streak-metrics">
               <div>
-                <strong>{streak.longest}</strong>
+                <strong><AnimatedCounter value={streak.longest} /></strong>
                 <span>Longest streak</span>
               </div>
               <div>
-                <strong>{streak.activeDays}</strong>
+                <strong><AnimatedCounter value={streak.activeDays} /></strong>
                 <span>Study days</span>
               </div>
             </div>
@@ -505,13 +528,14 @@ export default function DashboardPage() {
         </div>
 
         {/* Certification Progress Cards */}
-        <div className="dash-cert-grid">
+        <StaggerContainer className="dash-cert-grid">
           {examCerts.map((cert) => {
             const progress = certProgressMap[cert.slug];
             const examHref = `/exam?cert=${cert.slug}&plan=${hasPaidPlan ? "live" : "free"}&fresh=1`;
 
             return (
-              <div key={cert.slug} className="dash-cert-card">
+              <StaggerItem key={cert.slug}>
+              <div className="dash-cert-card">
                 {/* Accent bar */}
                 <div
                   className="dash-cert-accent"
@@ -601,12 +625,14 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerContainer>
 
         {/* Recent Exam History (from Supabase) */}
         {exams.length > 0 && (
+          <FadeIn>
           <div className="dash-history-section">
             <h2 className="dash-section-title">Recent Exam History</h2>
             <div className="dash-history-list">
@@ -653,6 +679,7 @@ export default function DashboardPage() {
               })}
             </div>
           </div>
+          </FadeIn>
         )}
 
         {/* Quick actions */}

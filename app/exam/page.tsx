@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   buildFreeTopicQuestions,
   buildRandomFixedPracticeSet,
@@ -401,6 +402,7 @@ function ExamContent() {
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number>(getTimeLimit(certSlug));
   const [prefetchError, setPrefetchError] = useState("");
+  const [showShortcutHelp, setShowShortcutHelp] = useState(false);
 
   // Derive cert-specific constants
   const totalQuestions = useMemo(() => getTotalQuestions(certSlug), [certSlug]);
@@ -428,6 +430,96 @@ function ExamContent() {
   const bufferedAhead = currentQuestion
     ? Math.max(0, questions.length - questionNumber)
     : questions.length;
+
+  // Lock body scroll when help modal is open
+  useEffect(() => {
+    if (showShortcutHelp) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showShortcutHelp]);
+
+  // Timer is low when less than 10% of total time or 10 minutes remaining
+  const isTimeLow = mode === "exam" && timeLeft < Math.min(getTimeLimit(certSlug) * 0.1, 600);
+  const isTimeCritical = mode === "exam" && timeLeft < 120;
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Ignore if user is typing in an input/select
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) return;
+
+      // 1-4 to select answer
+      if (e.key >= "1" && e.key <= "4" && !showAnswer && currentQuestion) {
+        const idx = parseInt(e.key) - 1;
+        if (idx < currentQuestion.options.length) {
+          e.preventDefault();
+          handleAnswer(idx);
+        }
+        return;
+      }
+
+      // Enter to review answer (practice mode)
+      if (e.key === "Enter" && mode === "practice" && selectedOption !== null && !showAnswer) {
+        e.preventDefault();
+        handleReviewAnswer();
+        return;
+      }
+
+      // N/n for Next
+      if ((e.key === "n" || e.key === "N") && !e.metaKey && !e.ctrlKey) {
+        if (selectedOption !== null && !(mode === "practice" && !hasReviewedCurrent)) {
+          e.preventDefault();
+          handleNext();
+        }
+        return;
+      }
+
+      // B/b for Back
+      if ((e.key === "b" || e.key === "B") && !e.metaKey && !e.ctrlKey) {
+        if (questionNumber > 1) {
+          e.preventDefault();
+          handleBack();
+        }
+        return;
+      }
+
+      // M/m to toggle mark for review
+      if (e.key === "m" || e.key === "M") {
+        e.preventDefault();
+        toggleMarkedForReview();
+        return;
+      }
+
+      // Escape to close answer
+      if (e.key === "Escape" && showAnswer) {
+        e.preventDefault();
+        setShowAnswer(false);
+        return;
+      }
+
+      // ? to toggle keyboard shortcut help
+      if (e.key === "?" || e.key === "/") {
+        e.preventDefault();
+        setShowShortcutHelp((prev) => !prev);
+        return;
+      }
+
+      // Escape to close help modal
+      if (e.key === "Escape" && showShortcutHelp) {
+        e.preventDefault();
+        setShowShortcutHelp(false);
+        return;
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  });
 
   const score = useMemo(
     () => questions.reduce((total, q) => (q.isCorrect ? total + 1 : total), 0),
@@ -942,11 +1034,48 @@ function ExamContent() {
             <span className="exam-status-chip exam-status-chip-review" /> Marked
           </div>
           <div className="exam-metrics">
-            <span>{mode === "exam" ? `Time Left: ${formattedTime}` : "No time limit"}</span>
+            <span
+              style={{
+                color: isTimeCritical ? "var(--accent-red)" : isTimeLow ? "#d97706" : undefined,
+                fontWeight: isTimeLow ? 900 : 700,
+              }}
+            >
+              {mode === "exam" ? (
+                <>
+                  <span className="kbd-hint" style={{ marginRight: 6 }}>T</span>
+                  Time: {formattedTime}
+                </>
+              ) : (
+                "No time limit"
+              )}
+            </span>
             <span>Score: {score}</span>
             <span>Marked: {markedCount}</span>
           </div>
         </div>
+
+        {/* Visual timer bar (exam mode only) */}
+        {mode === "exam" && (
+          <div
+            className="exam-timer-track"
+            aria-hidden="true"
+          >
+            <span
+              style={{
+                display: "block",
+                height: "100%",
+                width: `${(timeLeft / getTimeLimit(certSlug)) * 100}%`,
+                background: isTimeCritical
+                  ? "var(--accent-red)"
+                  : isTimeLow
+                    ? "#d97706"
+                    : "var(--accent-green)",
+                transition: "width 1s linear, background 0.3s ease",
+                borderRadius: 999,
+              }}
+            />
+          </div>
+        )}
 
         {prefetchError && <div className="exam-prefetch-note">{prefetchError}</div>}
 
@@ -978,6 +1107,7 @@ function ExamContent() {
             className="exam-button-red"
           >
             {mode === "exam" ? "Review After Submit" : "Review Answer"}
+            {mode === "practice" && <span className="kbd-hint">Enter</span>}
           </button>
           <button
             type="button"
@@ -985,6 +1115,7 @@ function ExamContent() {
             className="exam-button-secondary"
           >
             {currentQuestion?.markedForReview ? "Unmark Review" : "Mark For Review"}
+            <span className="kbd-hint">M</span>
           </button>
           <button
             type="button"
@@ -993,132 +1124,257 @@ function ExamContent() {
           >
             Submit Exam
           </button>
+          <button
+            type="button"
+            onClick={() => setShowShortcutHelp(true)}
+            className="exam-help-btn"
+            aria-label="Keyboard shortcuts"
+          >
+            ?
+            <span className="kbd-hint">?</span>
+          </button>
         </div>
 
         <div className="exam-content">
-          {!currentQuestion && (
-            <div className="exam-center-state">
-              <div className="exam-spinner" />
-              <p>Preparing the next question...</p>
-              <p>The background buffer is catching up.</p>
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {!currentQuestion && (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="exam-center-state">
+                  <div className="exam-spinner" />
+                  <p>Preparing the next question...</p>
+                  <p>The background buffer is catching up.</p>
+                </div>
+              </motion.div>
+            )}
 
-          {currentQuestion && (
-            <>
-              <div>
-                <div className="exam-question-meta">
-                  <h1 className="exam-muted-title">Question {questionNumber}</h1>
-                  {showAnswer && selectedOption !== null && (
-                    <span
-                      className={
-                        isCurrentCorrect
-                          ? "exam-result-badge exam-result-correct"
-                          : "exam-result-badge exam-result-incorrect"
+            {currentQuestion && (
+              <motion.div
+                key={currentQuestion.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                <div>
+                  <div className="exam-question-meta">
+                    <h1 className="exam-muted-title">
+                      Question {questionNumber}
+                      <span className="kbd-hint" style={{ marginLeft: 8 }}>1-4</span>
+                    </h1>
+                    {showAnswer && selectedOption !== null && (
+                      <span
+                        className={
+                          isCurrentCorrect
+                            ? "exam-result-badge exam-result-correct"
+                            : "exam-result-badge exam-result-incorrect"
+                        }
+                      >
+                        {isCurrentCorrect ? "Correct" : "Incorrect"}
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="exam-question">{cleanUserQuestionText(currentQuestion.question)}</h2>
+                </div>
+
+                <div className="exam-options">
+                  {currentQuestion.options.map((option, index) => {
+                    let buttonStyle = "";
+                    if (selectedOption === index) buttonStyle = "exam-option-selected";
+                    if (showAnswer) {
+                      if (index === currentQuestion.correctAnswer) {
+                        buttonStyle = "exam-option-correct";
+                      } else if (index === selectedOption && index !== currentQuestion.correctAnswer) {
+                        buttonStyle = "exam-option-wrong";
                       }
-                    >
-                      {isCurrentCorrect ? "Correct" : "Incorrect"}
-                    </span>
-                  )}
-                </div>
-                <h2 className="exam-question">{cleanUserQuestionText(currentQuestion.question)}</h2>
-              </div>
-
-              <div className="exam-options">
-                {currentQuestion.options.map((option, index) => {
-                  let buttonStyle = "";
-                  if (selectedOption === index) buttonStyle = "exam-option-selected";
-                  if (showAnswer) {
-                    if (index === currentQuestion.correctAnswer) {
-                      buttonStyle = "exam-option-correct";
-                    } else if (index === selectedOption && index !== currentQuestion.correctAnswer) {
-                      buttonStyle = "exam-option-wrong";
                     }
-                  }
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => !showAnswer && handleAnswer(index)}
-                      disabled={showAnswer}
-                      className={`exam-option ${buttonStyle}`}
-                    >
-                      <div className="exam-option-inner">
-                        <div className="exam-radio">
-                          {selectedOption === index && <div className="exam-radio-dot" />}
+                    return (
+                      <motion.button
+                        key={option}
+                        type="button"
+                        onClick={() => !showAnswer && handleAnswer(index)}
+                        disabled={showAnswer}
+                        className={`exam-option ${buttonStyle}`}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.25, delay: 0.05 * index, ease: "easeOut" }}
+                        whileHover={!showAnswer ? { scale: 1.01 } : undefined}
+                        whileTap={!showAnswer ? { scale: 0.98 } : undefined}
+                      >
+                        <div className="exam-option-inner">
+                          <div className="exam-radio">
+                            {selectedOption === index && <div className="exam-radio-dot" />}
+                          </div>
+                          <div className="exam-option-text">
+                            <span className="exam-option-label">{String.fromCharCode(65 + index)}.</span>
+                            {option}
+                          </div>
                         </div>
-                        <div className="exam-option-text">
-                          <span className="exam-option-label">{String.fromCharCode(65 + index)}.</span>
-                          {option}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {showAnswer && (
-                <div className="exam-explanation">
-                  <div className="exam-explanation-header">
-                    <p className="exam-explanation-title">Answer Explanation</p>
-                    <span>Correct answer: {String.fromCharCode(65 + currentQuestion.correctAnswer)}</span>
-                  </div>
-                  <p>{currentQuestion.explanation}</p>
-
-                  <div className="exam-explanation-grid">
-                    <div>
-                      <p className="exam-explanation-subtitle">Elimination Logic</p>
-                      <ul>
-                        {currentQuestion.options.map((option, index) => (
-                          <li key={option}>
-                            <strong>{String.fromCharCode(65 + index)}.</strong>{" "}
-                            {currentQuestion.whyOthersWrong?.[index] ?? getFallbackWhyWrong(currentQuestion, index)}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className="exam-mindset-tip">
-                      <p className="exam-explanation-subtitle">PMI Mindset Tip</p>
-                      <p>{getMindsetTip(currentQuestion)}</p>
-                    </div>
-                  </div>
-
-                  {!isCurrentCorrect && learningTopic && (
-                    <div className="exam-learning-card">
-                      <div>
-                        <p className="exam-explanation-subtitle">Recommended Study</p>
-                        <h3>{learningTopic.title}</h3>
-                        <p>{learningTopic.summary}</p>
-                      </div>
-                      <Link href={`/learn/${learningTopic.slug}`} className="exam-learn-link">
-                        Learn This Topic
-                      </Link>
-                    </div>
-                  )}
+                      </motion.button>
+                    );
+                  })}
                 </div>
-              )}
 
-              <div className="exam-footer">
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  disabled={questionNumber === 1}
-                  className="exam-button-red"
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={selectedOption === null || (mode === "practice" && !hasReviewedCurrent)}
-                  className="exam-button-red"
-                >
-                  Next
-                </button>
-              </div>
-            </>
-          )}
+                {showAnswer && (
+                  <motion.div
+                    className="exam-explanation"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                  >
+                    <div className="exam-explanation-header">
+                      <p className="exam-explanation-title">Answer Explanation</p>
+                      <span>Correct answer: {String.fromCharCode(65 + currentQuestion.correctAnswer)}</span>
+                    </div>
+                    <p>{currentQuestion.explanation}</p>
+
+                    <div className="exam-explanation-grid">
+                      <div>
+                        <p className="exam-explanation-subtitle">Elimination Logic</p>
+                        <ul>
+                          {currentQuestion.options.map((option, index) => (
+                            <li key={option}>
+                              <strong>{String.fromCharCode(65 + index)}.</strong>{" "}
+                              {currentQuestion.whyOthersWrong?.[index] ?? getFallbackWhyWrong(currentQuestion, index)}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="exam-mindset-tip">
+                        <p className="exam-explanation-subtitle">PMI Mindset Tip</p>
+                        <p>{getMindsetTip(currentQuestion)}</p>
+                      </div>
+                    </div>
+
+                    {!isCurrentCorrect && learningTopic && (
+                      <div className="exam-learning-card">
+                        <div>
+                          <p className="exam-explanation-subtitle">Recommended Study</p>
+                          <h3>{learningTopic.title}</h3>
+                          <p>{learningTopic.summary}</p>
+                        </div>
+                        <Link href={`/learn/${learningTopic.slug}`} className="exam-learn-link">
+                          Learn This Topic
+                        </Link>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                <div className="exam-footer">
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    disabled={questionNumber === 1}
+                    className="exam-button-red"
+                  >
+                    Back
+                    <span className="kbd-hint">B</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={selectedOption === null || (mode === "practice" && !hasReviewedCurrent)}
+                    className="exam-button-red"
+                  >
+                    Next
+                    <span className="kbd-hint">N</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+
+        {/* Keyboard Shortcut Help Modal */}
+        <AnimatePresence>
+          {showShortcutHelp && (
+            <motion.div
+              className="modal-overlay"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Keyboard shortcuts"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => setShowShortcutHelp(false)}
+            >
+              <motion.div
+                className="modal-content"
+                role="document"
+                initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.92, y: 20 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="modal-header">
+                  <h2>Keyboard Shortcuts</h2>
+                  <button
+                    type="button"
+                    className="modal-close-btn"
+                    onClick={() => setShowShortcutHelp(false)}
+                    aria-label="Close shortcuts"
+                  >
+                    &times;
+                  </button>
+                </div>
+                <div className="modal-shortcuts-grid">
+                  <div className="modal-shortcut-row">
+                    <span className="modal-shortcut-keys">
+                      <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd>
+                    </span>
+                    <span className="modal-shortcut-desc">Select answer option</span>
+                  </div>
+                  <div className="modal-shortcut-row">
+                    <span className="modal-shortcut-keys">
+                      <kbd>Enter</kbd>
+                    </span>
+                    <span className="modal-shortcut-desc">Review answer <span className="modal-shortcut-mode">(Practice mode)</span></span>
+                  </div>
+                  <div className="modal-shortcut-row">
+                    <span className="modal-shortcut-keys">
+                      <kbd>N</kbd>
+                    </span>
+                    <span className="modal-shortcut-desc">Next question</span>
+                  </div>
+                  <div className="modal-shortcut-row">
+                    <span className="modal-shortcut-keys">
+                      <kbd>B</kbd>
+                    </span>
+                    <span className="modal-shortcut-desc">Back to previous question</span>
+                  </div>
+                  <div className="modal-shortcut-row">
+                    <span className="modal-shortcut-keys">
+                      <kbd>M</kbd>
+                    </span>
+                    <span className="modal-shortcut-desc">Mark / unmark for review</span>
+                  </div>
+                  <div className="modal-shortcut-row">
+                    <span className="modal-shortcut-keys">
+                      <kbd>Esc</kbd>
+                    </span>
+                    <span className="modal-shortcut-desc">Close answer panel</span>
+                  </div>
+                  <div className="modal-shortcut-row">
+                    <span className="modal-shortcut-keys">
+                      <kbd>?</kbd>
+                    </span>
+                    <span className="modal-shortcut-desc">Toggle this help modal</span>
+                  </div>
+                </div>
+                <p className="modal-shortcuts-note">
+                  Shortcuts are disabled when typing in input fields.
+                </p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </main>
   );

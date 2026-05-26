@@ -4,6 +4,7 @@ import "./globals.css";
 import SiteNav from "./components/SiteNav";
 import ToastContainer from "./components/Toast";
 import { ThemeProvider } from "./lib/ThemeProvider";
+import { LayoutTransition } from "./components/Animations";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +35,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <ThemeProvider>
           <SiteNav />
-          {children}
+          <LayoutTransition>{children}</LayoutTransition>
           <ToastContainer />
         </ThemeProvider>
       </body>
